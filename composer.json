@@ -1,0 +1,33 @@
+{
+    "name": "nlksoft/nlktheme",
+    "description": "",
+    "keywords": ["laravel", "theme", "layout", "asset", "widget"],
+    "homepage": "https://github.com/nlksoft/nlktheme",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "nlksoft",
+            "email": "info@nlksoft.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "jeremeamia/superclosure": "^2.0"
+    },
+    "require-dev": {
+        "illuminate/support": ">=5.0.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Nlk\\Theme\\": "src/"
+        },
+        "classmap": [
+            "src/Exceptions.php"
+        ],
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "minimum-stability": "dev"
+}
