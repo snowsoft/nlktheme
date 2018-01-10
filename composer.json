@@ -1,8 +1,8 @@
 {
-    "name": "nlksoft/nlktheme",
+    "name": "snowsoft/nlktheme",
     "description": "",
     "keywords": ["laravel", "theme", "layout", "asset", "widget"],
-    "homepage": "https://github.com/nlksoft/nlktheme",
+    "homepage": "https://github.com/snowsoft/nlktheme",
     "type": "library",
     "license": "MIT",
     "authors": [
