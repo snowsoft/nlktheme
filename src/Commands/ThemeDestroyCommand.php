@@ -118,7 +118,7 @@ class ThemeDestroyCommand extends Command {
 	 */
 	protected function getOptions()
 	{
-		$path = base_path($this->config->get('theme.themeDir'));
+		$path = dirname(base_path()).'/'.$this->config->get('theme.themeDir');
 
 		return array(
 			array('path', null, InputOption::VALUE_OPTIONAL, 'Path to theme directory.', $path)

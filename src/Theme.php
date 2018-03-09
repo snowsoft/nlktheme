@@ -192,7 +192,7 @@ class Theme implements ThemeContract
 
         $this->compilers['blade'] = new BladeCompiler($files, 'theme');
 
-        $this->themesPath = base_path($this->path(""));
+        $this->themesPath = dirname(base_path()).$this->path("");
 
     }
 
@@ -324,7 +324,7 @@ class Theme implements ThemeContract
      */
     public function exists($theme)
     {
-        $path = base_path($this->path($theme)).'/';
+        $path = dirname(base_path()).'/'.$this->path($theme).'/';
 
         return is_dir($path);
     }
@@ -402,7 +402,7 @@ class Theme implements ThemeContract
 
             try {
                 // Require public theme config.
-                $minorConfigPath = base_path($this->themeConfig['themeDir'].'/'.$this->theme.'/config.php');
+                $minorConfigPath = dirname(base_path()).'/'.$this->themeConfig['themeDir'].'/'.$this->theme.'/config.php';
 
                 $this->themeConfig['themes'][$this->theme] = $this->files->getRequire($minorConfigPath);
             } catch (\Illuminate\Filesystem\FileNotFoundException $e) {
@@ -457,7 +457,7 @@ class Theme implements ThemeContract
     protected function addPathLocation($location)
     {
         // First path is in the selected theme.
-        $hints[] = base_path($location);
+        $hints[] = dirname(base_path()).'/'.$location;
 
         // This is nice feature to use inherit from another.
         if ($this->getConfig('inherit')) {
@@ -465,7 +465,7 @@ class Theme implements ThemeContract
             $inherit = $this->getConfig('inherit');
 
             // Inherit theme path.
-            $inheritPath = base_path($this->path($inherit));
+            $inheritPath = dirname(base_path()).'/'.$this->path($inherit);
 
             if ($this->files->isDirectory($inheritPath)) {
                 array_push($hints, $inheritPath);
@@ -579,7 +579,7 @@ class Theme implements ThemeContract
      */
     public function getThemePath()
     {
-        return base_path($this->path($this->theme)).'/';
+        return dirname(base_path()).'/'.$this->path($this->theme).'/';
     }
 
 

@@ -102,7 +102,7 @@ class WidgetGeneratorCommand extends Command {
 
         // Create widget directory.
         if (!$this->files->isDirectory(app_path().'/Widgets')){
-            $this->files->makeDirectory(app_path().'/Widgets', 0777, true);
+            $this->files->makeDirectory(app_path().'/Widgets', 0755, true);
         }
 
         // Widget class already exists.
@@ -132,7 +132,7 @@ class WidgetGeneratorCommand extends Command {
 
         // Checking directory.
         if (!$this->argument('theme') and ! $this->files->isDirectory($dirname)){
-            $this->files->makeDirectory($dirname, 0777, true);
+            $this->files->makeDirectory($dirname, 0755, true);
         }
 
         if (!$this->files->exists($this->getPath($file))){
@@ -187,7 +187,7 @@ class WidgetGeneratorCommand extends Command {
      */
     protected function getTemplate($template)
     {
-        $path = realpath(__DIR__.'/../templates/'.$template.'.txt');
+        $path = realpath(__DIR__.'/../templates/'.$template.'.php');
 
         return $this->files->get($path);
     }
@@ -212,7 +212,7 @@ class WidgetGeneratorCommand extends Command {
      */
     protected function getOptions()
     {
-        $path = base_path($this->config->get('theme.themeDir'));
+        $path = dirname(base_path()).'/'.$this->config->get('theme.themeDir');
 
         return array(
             array('path', 'p', InputOption::VALUE_OPTIONAL, 'Path to theme directory.', $path),
