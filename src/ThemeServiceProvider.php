@@ -77,6 +77,7 @@ class ThemeServiceProvider extends ServiceProvider {
 		$this->commands(
 						'theme.create',
 						'theme.widget',
+						'theme.plugin',
 						'theme.list',
 						'theme.duplicate',
 						'theme.destroy'
@@ -206,6 +207,22 @@ class ThemeServiceProvider extends ServiceProvider {
 		});
 	}
 
+
+
+    /**
+     * Register generator of widget.
+     *
+     * @return void
+     */
+    public function registerPluginGenerator()
+    {
+        $this->app->singleton('theme.plugin', function($app)
+        {
+            return new Commands\WidgetGeneratorCommand($app['config'], $app['files']);
+        });
+    }
+
+
 	/**
 	 * Register theme destroy.
 	 *
@@ -239,7 +256,7 @@ class ThemeServiceProvider extends ServiceProvider {
 	 */
 	public function provides()
 	{
-		return array('asset', 'theme', 'widget', 'breadcrumb');
+		return array('asset', 'theme', 'widget','plugin', 'breadcrumb');
 	}
 
 }
