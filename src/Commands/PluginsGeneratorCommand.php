@@ -7,7 +7,11 @@
  */
 
 namespace Nlk\Theme\Commands;
-
+use Illuminate\Console\Command;
+use Illuminate\Config\Repository;
+use Illuminate\Filesystem\Filesystem as File;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Input\InputArgument;
 
 class PluginsGeneratorCommand extends Command
 {
@@ -71,13 +75,13 @@ class PluginsGeneratorCommand extends Command
     public function handle()
     {
         // Widget class name is camel case.
-        $pluginClassName = ucfirst($this->getWidgetName());
+        $pluginClassName = ucfirst($this->getPluginName());
 
         // Widget class file is camel with php extension.
         $pluginClassFile = $pluginClassName.'.php';
 
         // CamelCase for template.
-        $pluginClassTpl = lcfirst($this->getWidgetName());
+        $pluginClassTpl = lcfirst($this->getPluginName());
 
         // Get class template.
         $pluginClassTemplate = $this->getTemplate('pluginClass');
@@ -111,7 +115,7 @@ class PluginsGeneratorCommand extends Command
 
         // Widget class already exists.
         if ($this->files->exists(app_path().'/Plugins/'.$pluginClassFile)){
-            return $this->error('Plugin "'.$this->getWidgetName().'" is already exists.');
+            return $this->error('Plugin "'.$this->getPluginName().'" is already exists.');
         }
 
         // Create class file.
@@ -120,7 +124,7 @@ class PluginsGeneratorCommand extends Command
         // Make file example.
         $this->makeFile('plugins/'.$pluginClassTpl.'.blade.php', $this->getTemplate('plugin.blade'));
 
-        $this->info('Plugin "'.$this->getWidgetName().'" has been created.');
+        $this->info('Plugin "'.$this->getPluginName().'" has been created.');
     }
 
     /**

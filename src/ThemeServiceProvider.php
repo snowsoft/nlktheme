@@ -69,6 +69,7 @@ class ThemeServiceProvider extends ServiceProvider {
 		// Register commands:
 		$this->registerThemeGenerator();
 		$this->registerWidgetGenerator();
+		$this->registerPluginGenerator();
 		$this->registerThemeList();
 		$this->registerThemeDuplicate();
 		$this->registerThemeDestroy();
@@ -218,7 +219,7 @@ class ThemeServiceProvider extends ServiceProvider {
     {
         $this->app->singleton('theme.plugin', function($app)
         {
-            return new Commands\WidgetGeneratorCommand($app['config'], $app['files']);
+            return new Commands\PluginsGeneratorCommand($app['config'], $app['files']);
         });
     }
 

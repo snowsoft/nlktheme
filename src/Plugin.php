@@ -68,7 +68,7 @@ abstract class Plugin {
      * @param  Theme                         $theme
      * @param  \Illuminate\Config\Repository $config
      * @param  \Illuminate\View\Factory      $view
-     * @return \Nlk\Theme\Widget
+     * @return \Nlk\Theme\Plugin
      */
     public function __construct(Theme $theme, Repository $config, Factory $view)
     {
@@ -202,7 +202,7 @@ abstract class Plugin {
 
         // If not found in theme widgets directory, try to watch in views/widgets again.
         if($this->watch === true and ! $this->view->exists($path)){
-            $path = 'plugins.'.$this->template;
+            $path = 'plugin.'.$this->template;
         }
 
         // Error file not exists.
