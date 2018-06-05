@@ -16,6 +16,9 @@ return array(
 
 	'assetUrl' => env('APP_ASSET_URL', '/'),
 
+
+	'defaultTheme' => 'default',
+
 	/*
 	|--------------------------------------------------------------------------
 	| Theme Default

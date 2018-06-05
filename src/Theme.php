@@ -513,6 +513,7 @@ class Theme implements ThemeContract
 
         // Add location to look up view.
         $this->addPathLocation($this->path());
+        $this->addPathLocation($this->getConfig('themeDefault'));
 
         // Fire event before set up a theme.
         $this->fire('before', $this);
