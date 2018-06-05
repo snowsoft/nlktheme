@@ -74,8 +74,10 @@ abstract class Plugin {
     {
         // Theme name.
         $this->theme = $theme;
+
         // Laravel config
         $this->config = $config;
+
         $this->view = $view;
     }
 

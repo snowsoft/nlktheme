@@ -1,7 +1,7 @@
 <?php namespace {pluginNamespace};
 
 use Nlk\Theme\Theme;
-use Nlk\Theme\Plugin;
+use Nlk\Theme\Widget;
 
 class {pluginClass} extends Plugin {
 
