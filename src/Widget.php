@@ -1,4 +1,4 @@
-<?php namespace Facuz\Theme;
+<?php namespace Nlk\Theme;
 
 use Closure;
 use Illuminate\View\Factory;
@@ -68,7 +68,7 @@ abstract class Widget {
      * @param  Theme                         $theme
      * @param  \Illuminate\Config\Repository $config
      * @param  \Illuminate\View\Factory      $view
-     * @return \Facuz\Theme\Widget
+     * @return \Nlk\Theme\Widget
      */
     public function __construct(Theme $theme, Repository $config, Factory $view)
     {

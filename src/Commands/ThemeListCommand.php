@@ -1,4 +1,4 @@
-<?php namespace Facuz\Theme\Commands;
+<?php namespace Nlk\Theme\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Config\Repository;
@@ -6,7 +6,7 @@ use Illuminate\Filesystem\Filesystem as File;
 use Symfony\Component\Console\Input\InputOption;
 use Illuminate\Database\Eloquent\Collection;
 use Symfony\Component\Console\Input\InputArgument;
-use Facuz\Theme\Theme;
+use Nlk\Theme\Theme;
 
 class ThemeListCommand extends Command {
 
@@ -43,7 +43,7 @@ class ThemeListCommand extends Command {
 	 *
 	 * @param \Illuminate\Config\Repository     $config
 	 * @param \Illuminate\Filesystem\Filesystem $files
-	 * @return \Facuz\Theme\Commands\ThemeListCommand
+	 * @return \Nlk\Theme\Commands\ThemeListCommand
 	 */
 	public function __construct(Repository $config, File $files)
 	{

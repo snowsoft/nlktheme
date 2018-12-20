@@ -1,4 +1,4 @@
-<?php namespace Facuz\Theme;
+<?php namespace Nlk\Theme;
 
 class UnknownThemeException extends \UnexpectedValueException {}
 class UnknownViewFileException extends \UnexpectedValueException {}

@@ -1,4 +1,4 @@
-<?php namespace Facuz\Theme;
+<?php namespace Nlk\Theme;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Routing\Router;
@@ -131,7 +131,7 @@ class ThemeServiceProvider extends ServiceProvider {
 			return new Theme($app['config'], $app['events'], $app['view'], $app['asset'], $app['files'], $app['breadcrumb'], $app['manifest']);
 		});
 
-		$this->app->alias('theme', 'Facuz\Theme\Contracts\Theme');
+		$this->app->alias('theme', 'Nlk\Theme\Contracts\Theme');
 	}
 
 	/**

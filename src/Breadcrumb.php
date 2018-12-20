@@ -1,4 +1,4 @@
-<?php namespace Facuz\Theme;
+<?php namespace Nlk\Theme;
 
 use Illuminate\Support\Facades\URL;
 use Illuminate\Filesystem\Filesystem;
@@ -31,7 +31,7 @@ class Breadcrumb {
      *
      * @param  \Illuminate\Filesystem\Filesystem $files
      *
-     * @return \Facuz\Theme\Breadcrumb
+     * @return \Nlk\Theme\Breadcrumb
      */
     public function __construct(Filesystem $files)
     {

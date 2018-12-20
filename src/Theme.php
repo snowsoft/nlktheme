@@ -1,4 +1,4 @@
-<?php namespace Facuz\Theme;
+<?php namespace Nlk\Theme;
 
 use Closure;
 use ReflectionClass;
@@ -10,8 +10,8 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\View\Compilers\BladeCompiler;
 use Illuminate\Database\Eloquent\Collection;
 use Symfony\Component\HttpFoundation\Cookie;
-use Facuz\Theme\Contracts\Theme as ThemeContract;
-use Facuz\Theme\Manifest;
+use Nlk\Theme\Contracts\Theme as ThemeContract;
+use Nlk\Theme\Manifest;
 
 class Theme implements ThemeContract
 {
@@ -30,7 +30,7 @@ class Theme implements ThemeContract
     /**
      * Manifest.
      *
-     * @var \Facuz\Theme\Manifest
+     * @var \Nlk\Theme\Manifest
      */
     protected $manifest;
 
@@ -154,12 +154,12 @@ class Theme implements ThemeContract
      * @param  \Illuminate\Config\Repository $config
      * @param  \Illuminate\Events\Dispatcher $events
      * @param  \Illuminate\View\Factory $view |
-     * @param  \Facuz\Theme\asset $asset
+     * @param  \Nlk\Theme\asset $asset
      * @param  \Illuminate\Filesystem\Filesystem $files
-     * @param  \Facuz\Breadcrumb|\Facuz\Theme\Breadcrumb $breadcrumb
-     * @param  \Facuz\Theme\Manifest $manifest
+     * @param  \Facuz\Breadcrumb|\Nlk\Theme\Breadcrumb $breadcrumb
+     * @param  \Nlk\Theme\Manifest $manifest
      *
-     * @return \Facuz\Theme\Theme
+     * @return \Nlk\Theme\Theme
      */
     public function __construct(Repository $config,
                                 Dispatcher $events,
@@ -786,7 +786,7 @@ class Theme implements ThemeContract
      * @param  string $className
      * @param  array $attributes
      * @throws UnknownWidgetClassException
-     * @return Facuz\Theme\Widget
+     * @return Nlk\Theme\Widget
      */
     public function widget($className, $attributes = array())
     {
@@ -947,7 +947,7 @@ class Theme implements ThemeContract
     /**
      * Return asset instance.
      *
-     * @return \Facuz\Theme\Asset
+     * @return \Nlk\Theme\Asset
      */
     public function asset()
     {
@@ -957,7 +957,7 @@ class Theme implements ThemeContract
     /**
      * Return breadcrumb instance.
      *
-     * @return \Facuz\Theme\Breadcrumb
+     * @return \Nlk\Theme\Breadcrumb
      */
     public function breadcrumb()
     {

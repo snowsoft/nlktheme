@@ -1,7 +1,7 @@
 <?php namespace {widgetNamespace};
 
-use Facuz\Theme\Theme;
-use Facuz\Theme\Widget;
+use Nlk\Theme\Theme;
+use Nlk\Theme\Widget;
 
 class {widgetClass} extends Widget {
 

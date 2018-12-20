@@ -1,4 +1,4 @@
-<?php namespace Facuz\Theme\Commands;
+<?php namespace Nlk\Theme\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Config\Repository;
@@ -41,7 +41,7 @@ class ThemeGeneratorCommand extends Command {
 	 *
 	 * @param \Illuminate\Config\Repository     $config
 	 * @param \Illuminate\Filesystem\Filesystem $files
-	 * @return \Facuz\Theme\Commands\ThemeGeneratorCommand
+	 * @return \Nlk\Theme\Commands\ThemeGeneratorCommand
 	 */
 	public function __construct(Repository $config, File $files)
 	{
