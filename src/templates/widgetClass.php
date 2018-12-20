@@ -1,7 +1,7 @@
 <?php namespace {widgetNamespace};
 
-use Nlk\Theme\Theme;
-use Nlk\Theme\Widget;
+use Facuz\Theme\Theme;
+use Facuz\Theme\Widget;
 
 class {widgetClass} extends Widget {
 
@@ -25,8 +25,8 @@ class {widgetClass} extends Widget {
      * @var array
      */
     public $attributes = array(
-        'userId' => 9999,
-        'label'  => 'Generated Widget',
+        //'userId' => 9999,
+        'label'  => 'Default widget label',
     );
 
     /**
@@ -56,7 +56,7 @@ class {widgetClass} extends Widget {
      */
     public function run()
     {
-        $label = $this->getAttribute('label');
+        //$label = $this->getAttribute('label');
 
         //$this->setAttribute('label', 'changed');
 

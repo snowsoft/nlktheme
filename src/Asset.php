@@ -1,4 +1,4 @@
-<?php namespace Nlk\Theme;
+<?php namespace Facuz\Theme;
 
 use Closure;
 use Illuminate\Support\Facades\URL;

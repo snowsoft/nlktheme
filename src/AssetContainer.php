@@ -1,4 +1,4 @@
-<?php namespace Nlk\Theme;
+<?php namespace Facuz\Theme;
 
 use Closure;
 use Illuminate\Support\Str;
@@ -58,7 +58,7 @@ class AssetContainer {
      */
     protected function configAssetUrl($path, $secure = null)
     {
-       static $assetUrl;
+        static $assetUrl;
 
         // Remove this.
         $i = 'index.php';
@@ -130,6 +130,8 @@ class AssetContainer {
         }
 
         $path = $this->getCurrentPath().$uri;
+
+        if(substr($path, 0, 6)=='public') $path = substr($path, 7);
 
         return $this->configAssetUrl($path, $secure);
     }
@@ -214,13 +216,13 @@ class AssetContainer {
     public function add($name, $source = null, $dependencies = array(), $attributes = array())
     {
         if(!is_array($name)) {
-            if(!isset($source)) throw new \ErrorException("Missing argument 2 for Nlk\Theme\AssetContainer::add()", 1);
+            if(!isset($source)) throw new \ErrorException("Missing argument 2 for Facuz\Theme\AssetContainer::add()", 1);
             
             return $this->added($name, $source, $dependencies, $attributes);
         }
 
         foreach ($name as $array) {
-            if(count($array) < 2) throw new \ErrorException("Missing value 2 of the array for Nlk\Theme\AssetContainer::add()", 1);
+            if(count($array) < 2) throw new \ErrorException("Missing value 2 of the array for Facuz\Theme\AssetContainer::add()", 1);
             $container = $array[0];
             $source = $array[1]; 
             $dependencies = isset($array[2]) ? $array[2] : [];

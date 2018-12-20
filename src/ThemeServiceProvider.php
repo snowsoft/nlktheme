@@ -1,4 +1,4 @@
-<?php namespace Nlk\Theme;
+<?php namespace Facuz\Theme;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Routing\Router;
@@ -30,7 +30,9 @@ class ThemeServiceProvider extends ServiceProvider {
 
 	    // Register blade directives:
 		$this->addToBlade(['dd', 'dd(%s);']);
+		$this->addToBlade(['dv', 'dd(get_defined_vars()[%s]);', 'dd(get_defined_vars()["__data"]);']);
 		$this->addToBlade(['d', 'dump(%s);']);
+
 
 		$this->addToBlade(['get', 'Theme::get(%s);']);
 		$this->addToBlade(['getIfHas', 'Theme::has(%1$s) ? Theme::get(%1$s) : ""']);
@@ -41,8 +43,12 @@ class ThemeServiceProvider extends ServiceProvider {
 
 		$this->addToBlade(['asset', 'Theme::asset()->absUrl(%s);']);
 
+		$this->addToBlade(['protect', 'protectEmail(%s);']);
+
 		$this->addToBlade(['styles', 'Theme::asset()->container(%s)->styles();', 'Theme::asset()->styles();']);
 		$this->addToBlade(['scripts', 'Theme::asset()->container(%s)->scripts();', 'Theme::asset()->scripts();']);
+
+		$this->addToBlade(['widget', 'Theme::widget(%s)->render();']);
 	}
 
 	/**
@@ -62,14 +68,13 @@ class ThemeServiceProvider extends ServiceProvider {
 		// Register providers:
 		$this->registerAsset();
 		$this->registerTheme();
-		//$this->registerWidget();
+		$this->registerWidget();
 		$this->registerBreadcrumb();
 		$this->registerManifest();
 
 		// Register commands:
 		$this->registerThemeGenerator();
 		$this->registerWidgetGenerator();
-		$this->registerPluginGenerator();
 		$this->registerThemeList();
 		$this->registerThemeDuplicate();
 		$this->registerThemeDestroy();
@@ -78,7 +83,6 @@ class ThemeServiceProvider extends ServiceProvider {
 		$this->commands(
 						'theme.create',
 						'theme.widget',
-						'theme.plugin',
 						'theme.list',
 						'theme.duplicate',
 						'theme.destroy'
@@ -127,7 +131,7 @@ class ThemeServiceProvider extends ServiceProvider {
 			return new Theme($app['config'], $app['events'], $app['view'], $app['asset'], $app['files'], $app['breadcrumb'], $app['manifest']);
 		});
 
-		$this->app->alias('theme', 'Nlk\Theme\Contracts\Theme');
+		$this->app->alias('theme', 'Facuz\Theme\Contracts\Theme');
 	}
 
 	/**
@@ -135,13 +139,13 @@ class ThemeServiceProvider extends ServiceProvider {
 	 *
 	 * @return void
 	 */
-	// public function registerWidget()
-	// {
-	//     $this->app['widget'] = $this->app->share(function($app)
-	//     {
-	//         return new Widget($app['view']);
-	//     });
-	// }
+	public function registerWidget()
+	{
+		$this->app->singleton('widget', function($app)
+		{
+			return new Widget($app['view']);
+		});
+	}
 
 	/**
 	 * Register breadcrumb provider.
@@ -208,22 +212,6 @@ class ThemeServiceProvider extends ServiceProvider {
 		});
 	}
 
-
-
-    /**
-     * Register generator of widget.
-     *
-     * @return void
-     */
-    public function registerPluginGenerator()
-    {
-        $this->app->singleton('theme.plugin', function($app)
-        {
-            return new Commands\PluginsGeneratorCommand($app['config'], $app['files']);
-        });
-    }
-
-
 	/**
 	 * Register theme destroy.
 	 *
@@ -257,7 +245,7 @@ class ThemeServiceProvider extends ServiceProvider {
 	 */
 	public function provides()
 	{
-		return array('asset', 'theme', 'widget','plugin', 'breadcrumb');
+		return array('asset', 'theme', 'widget', 'breadcrumb');
 	}
 
 }

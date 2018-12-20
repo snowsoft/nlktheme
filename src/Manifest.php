@@ -1,4 +1,4 @@
-<?php namespace Nlk\Theme;
+<?php namespace Facuz\Theme;
 
 use Illuminate\Filesystem\Filesystem;
 
@@ -22,7 +22,7 @@ class Manifest
      * Create a new theme instance.
      *
      * @param  \Illuminate\Filesystem\Filesystem $files
-     * @return \Nlk\Theme\Manifest
+     * @return \Facuz\Theme\Manifest
      */
 	public function __construct(Filesystem $files)
     {

@@ -1,4 +1,4 @@
-<?php namespace Nlk\Theme\Commands;
+<?php namespace Facuz\Theme\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Config\Repository;
@@ -6,7 +6,7 @@ use Illuminate\Filesystem\Filesystem as File;
 use Symfony\Component\Console\Input\InputOption;
 use Illuminate\Database\Eloquent\Collection;
 use Symfony\Component\Console\Input\InputArgument;
-use Nlk\Theme\Theme;
+use Facuz\Theme\Theme;
 
 class ThemeListCommand extends Command {
 
@@ -43,7 +43,7 @@ class ThemeListCommand extends Command {
 	 *
 	 * @param \Illuminate\Config\Repository     $config
 	 * @param \Illuminate\Filesystem\Filesystem $files
-	 * @return \Nlk\Theme\Commands\ThemeListCommand
+	 * @return \Facuz\Theme\Commands\ThemeListCommand
 	 */
 	public function __construct(Repository $config, File $files)
 	{
@@ -74,7 +74,7 @@ class ThemeListCommand extends Command {
             }
         }
         
-		$headers = ['#', 'Nombre'];
+		$headers = ['#', 'Theme name'];
 
 		if(!$empty){
 			$this->table($headers, $themes);
@@ -125,7 +125,7 @@ class ThemeListCommand extends Command {
 	 */
 	protected function getOptions()
 	{
-		$path =  dirname(base_path()).'/'.$this->config->get('theme.themeDir');
+		$path = base_path($this->config->get('theme.themeDir'));
 
 		return array(
 			array('path', null, InputOption::VALUE_OPTIONAL, 'Path to theme directory.', $path)

@@ -1,4 +1,4 @@
-<?php namespace Nlk\Theme\Commands;
+<?php namespace Facuz\Theme\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Config\Repository;
@@ -20,7 +20,7 @@ class ThemeDestroyCommand extends Command {
 	 *
 	 * @var string
 	 */
-	protected $description = 'Remove theme exsisting';
+	protected $description = 'Remove a theme.';
 
 	/**
 	 * Repository config.
@@ -41,7 +41,7 @@ class ThemeDestroyCommand extends Command {
      *
      * @param \Illuminate\Config\Repository     $config
      * @param \Illuminate\Filesystem\Filesystem $files
-     * @return \Nlk\Theme\Commands\ThemeDestroyCommand
+     * @return \Facuz\Theme\Commands\ThemeDestroyCommand
      */
 	public function __construct(Repository $config, File $files)
 	{
@@ -118,7 +118,7 @@ class ThemeDestroyCommand extends Command {
 	 */
 	protected function getOptions()
 	{
-		$path = dirname(base_path()).'/'.$this->config->get('theme.themeDir');
+		$path = base_path($this->config->get('theme.themeDir'));
 
 		return array(
 			array('path', null, InputOption::VALUE_OPTIONAL, 'Path to theme directory.', $path)

@@ -1,4 +1,4 @@
-<?php namespace Nlk\Theme\Commands;
+<?php namespace Facuz\Theme\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Config\Repository;
@@ -20,7 +20,7 @@ class ThemeGeneratorCommand extends Command {
 	 *
 	 * @var string
 	 */
-	protected $description = 'Generate theme structure';
+	protected $description = 'Generate theme structure.';
 
 	/**
 	 * Repository config.
@@ -41,7 +41,7 @@ class ThemeGeneratorCommand extends Command {
 	 *
 	 * @param \Illuminate\Config\Repository     $config
 	 * @param \Illuminate\Filesystem\Filesystem $files
-	 * @return \Nlk\Theme\Commands\ThemeGeneratorCommand
+	 * @return \Facuz\Theme\Commands\ThemeGeneratorCommand
 	 */
 	public function __construct(Repository $config, File $files)
 	{
@@ -192,7 +192,7 @@ class ThemeGeneratorCommand extends Command {
 	 */
 	protected function getOptions()
 	{
-		$path = dirname(base_path()).'/'.$this->config->get('theme.themeDir');
+		$path = base_path($this->config->get('theme.themeDir'));
 
 		return array(
 			array('path', null, InputOption::VALUE_OPTIONAL, 'Path to theme directory.', $path),

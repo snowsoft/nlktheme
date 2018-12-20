@@ -1,4 +1,4 @@
-<?php namespace Nlk\Theme\Commands;
+<?php namespace Facuz\Theme\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Config\Repository;
@@ -20,7 +20,7 @@ class ThemeDuplicateCommand extends Command {
 	 *
 	 * @var string
 	 */
-	protected $description = 'Duplicate theme structure from other theme';
+	protected $description = 'Duplicate theme structure from other theme.';
 
 	/**
 	 * Repository config.
@@ -41,7 +41,7 @@ class ThemeDuplicateCommand extends Command {
 	 *
 	 * @param \Illuminate\Config\Repository     $config
 	 * @param \Illuminate\Filesystem\Filesystem $files
-	 * @return \Nlk\Theme\Commands\ThemeDuplicateCommand
+	 * @return \Facuz\Theme\Commands\ThemeDuplicateCommand
 	 */
 	public function __construct(Repository $config, File $files)
 	{
@@ -112,7 +112,7 @@ class ThemeDuplicateCommand extends Command {
 	 */
 	protected function getOptions()
 	{
-		$path = dirname(base_path()).'/'.$this->config->get('theme.themeDir');
+		$path = base_path($this->config->get('theme.themeDir'));
 
 		return array(
 			array('path', null, InputOption::VALUE_OPTIONAL, 'Path to theme directory.', $path),

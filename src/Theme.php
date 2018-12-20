@@ -1,4 +1,4 @@
-<?php namespace Nlk\Theme;
+<?php namespace Facuz\Theme;
 
 use Closure;
 use ReflectionClass;
@@ -10,8 +10,8 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\View\Compilers\BladeCompiler;
 use Illuminate\Database\Eloquent\Collection;
 use Symfony\Component\HttpFoundation\Cookie;
-use Nlk\Theme\Contracts\Theme as ThemeContract;
-use Nlk\Theme\Manifest;
+use Facuz\Theme\Contracts\Theme as ThemeContract;
+use Facuz\Theme\Manifest;
 
 class Theme implements ThemeContract
 {
@@ -30,7 +30,7 @@ class Theme implements ThemeContract
     /**
      * Manifest.
      *
-     * @var \Nlk\Theme\Manifest
+     * @var \Facuz\Theme\Manifest
      */
     protected $manifest;
 
@@ -154,12 +154,12 @@ class Theme implements ThemeContract
      * @param  \Illuminate\Config\Repository $config
      * @param  \Illuminate\Events\Dispatcher $events
      * @param  \Illuminate\View\Factory $view |
-     * @param  \Nlk\Theme\asset $asset
+     * @param  \Facuz\Theme\asset $asset
      * @param  \Illuminate\Filesystem\Filesystem $files
-     * @param  \Facuz\Breadcrumb|\Nlk\Theme\Breadcrumb $breadcrumb
-     * @param  \Nlk\Theme\Manifest $manifest
+     * @param  \Facuz\Breadcrumb|\Facuz\Theme\Breadcrumb $breadcrumb
+     * @param  \Facuz\Theme\Manifest $manifest
      *
-     * @return \Nlk\Theme\Theme
+     * @return \Facuz\Theme\Theme
      */
     public function __construct(Repository $config,
                                 Dispatcher $events,
@@ -192,7 +192,7 @@ class Theme implements ThemeContract
 
         $this->compilers['blade'] = new BladeCompiler($files, 'theme');
 
-        $this->themesPath = dirname(base_path()).$this->path("");
+        $this->themesPath = base_path($this->path(""));
 
     }
 
@@ -324,7 +324,7 @@ class Theme implements ThemeContract
      */
     public function exists($theme)
     {
-        $path = dirname(base_path()).'/'.$this->path($theme).'/';
+        $path = base_path($this->path($theme)).'/';
 
         return is_dir($path);
     }
@@ -402,7 +402,7 @@ class Theme implements ThemeContract
 
             try {
                 // Require public theme config.
-                $minorConfigPath = dirname(base_path()).'/'.$this->themeConfig['themeDir'].'/'.$this->theme.'/config.php';
+                $minorConfigPath = base_path($this->themeConfig['themeDir'].'/'.$this->theme.'/config.php');
 
                 $this->themeConfig['themes'][$this->theme] = $this->files->getRequire($minorConfigPath);
             } catch (\Illuminate\Filesystem\FileNotFoundException $e) {
@@ -457,7 +457,7 @@ class Theme implements ThemeContract
     protected function addPathLocation($location)
     {
         // First path is in the selected theme.
-        $hints[] = dirname(base_path()).'/'.$location;
+        $hints[] = base_path($location);
 
         // This is nice feature to use inherit from another.
         if ($this->getConfig('inherit')) {
@@ -465,7 +465,7 @@ class Theme implements ThemeContract
             $inherit = $this->getConfig('inherit');
 
             // Inherit theme path.
-            $inheritPath = dirname(base_path()).'/'.$this->path($inherit);
+            $inheritPath = base_path($this->path($inherit));
 
             if ($this->files->isDirectory($inheritPath)) {
                 array_push($hints, $inheritPath);
@@ -513,8 +513,6 @@ class Theme implements ThemeContract
 
         // Add location to look up view.
         $this->addPathLocation($this->path());
-
-        $this->addPathLocation($this->getConfig('themeDefault'));
 
         // Fire event before set up a theme.
         $this->fire('before', $this);
@@ -581,7 +579,7 @@ class Theme implements ThemeContract
      */
     public function getThemePath()
     {
-        return dirname(base_path()).'/'.$this->path($this->theme).'/';
+        return base_path($this->path($this->theme)).'/';
     }
 
 
@@ -788,7 +786,7 @@ class Theme implements ThemeContract
      * @param  string $className
      * @param  array $attributes
      * @throws UnknownWidgetClassException
-     * @return Nlk\Theme\Widget
+     * @return Facuz\Theme\Widget
      */
     public function widget($className, $attributes = array())
     {
@@ -949,7 +947,7 @@ class Theme implements ThemeContract
     /**
      * Return asset instance.
      *
-     * @return \Nlk\Theme\Asset
+     * @return \Facuz\Theme\Asset
      */
     public function asset()
     {
@@ -959,7 +957,7 @@ class Theme implements ThemeContract
     /**
      * Return breadcrumb instance.
      *
-     * @return \Nlk\Theme\Breadcrumb
+     * @return \Facuz\Theme\Breadcrumb
      */
     public function breadcrumb()
     {
@@ -1163,10 +1161,13 @@ class Theme implements ThemeContract
      */
     public function location($realpath = false)
     {
-        if ($this->view->exists($this->content)) {
-            return ($realpath) ? $this->view->getFinder()->find($this->content) : $this->content;
-        } 
-        return null;
+        try {
+            if ($this->view->exists($this->content)) {
+                return ($realpath) ? $this->view->getFinder()->find($this->content) : $this->content;
+            }  
+        } catch (\InvalidArgumentException $e) {
+            return null;
+        }
     }
 
     /**

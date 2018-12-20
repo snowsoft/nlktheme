@@ -1,4 +1,4 @@
-<?php namespace Nlk\Theme\Commands;
+<?php namespace Facuz\Theme\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Config\Repository;
@@ -20,7 +20,7 @@ class WidgetGeneratorCommand extends Command {
      *
      * @var string
      */
-    protected $description = 'Generate widget structure';
+    protected $description = 'Generate widget structure.';
 
     /**
      * Widget view template global.
@@ -48,7 +48,7 @@ class WidgetGeneratorCommand extends Command {
      *
      * @param \Illuminate\Config\Repository     $config
      * @param \Illuminate\Filesystem\Filesystem $files
-     * @return \Nlk\Theme\Commands\WidgetGeneratorCommand
+     * @return \Facuz\Theme\Commands\WidgetGeneratorCommand
      */
     public function __construct(Repository $config, File $files)
     {
@@ -85,6 +85,12 @@ class WidgetGeneratorCommand extends Command {
         if ($this->option('global') === false and ! $this->argument('theme')){
             return $this->error('Please specific a theme name or use option -g to create as a global widget.');
         }
+       
+        $theme_path = base_path($this->config->get('theme.themeDir').'/'.$this->getTheme());
+       
+        if (is_dir($theme_path) === false){
+            return $this->error('The theme "'.$this->getTheme().'" does not exist.');
+        }
 
         // Create as a global use -g.
         if ($this->option('global') === true){
@@ -102,7 +108,7 @@ class WidgetGeneratorCommand extends Command {
 
         // Create widget directory.
         if (!$this->files->isDirectory(app_path().'/Widgets')){
-            $this->files->makeDirectory(app_path().'/Widgets', 0755, true);
+            $this->files->makeDirectory(app_path().'/Widgets', 0777, true);
         }
 
         // Widget class already exists.
@@ -132,7 +138,7 @@ class WidgetGeneratorCommand extends Command {
 
         // Checking directory.
         if (!$this->argument('theme') and ! $this->files->isDirectory($dirname)){
-            $this->files->makeDirectory($dirname, 0755, true);
+            $this->files->makeDirectory($dirname, 0777, true);
         }
 
         if (!$this->files->exists($this->getPath($file))){
@@ -212,7 +218,7 @@ class WidgetGeneratorCommand extends Command {
      */
     protected function getOptions()
     {
-        $path = dirname(base_path()).'/'.$this->config->get('theme.themeDir');
+        $path = base_path($this->config->get('theme.themeDir'));
 
         return array(
             array('path', 'p', InputOption::VALUE_OPTIONAL, 'Path to theme directory.', $path),

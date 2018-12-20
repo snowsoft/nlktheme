@@ -1,4 +1,4 @@
-<?php namespace Nlk\Theme;
+<?php namespace Facuz\Theme;
 
 use Illuminate\Support\Facades\URL;
 use Illuminate\Filesystem\Filesystem;
@@ -31,7 +31,7 @@ class Breadcrumb {
      *
      * @param  \Illuminate\Filesystem\Filesystem $files
      *
-     * @return \Nlk\Theme\Breadcrumb
+     * @return \Facuz\Theme\Breadcrumb
      */
     public function __construct(Filesystem $files)
     {
@@ -125,7 +125,6 @@ class Breadcrumb {
 
         ob_start() and extract($data, EXTR_SKIP);
         try {
-
             eval('?>'.$parsed);
         } catch (\Exception $e) {
             ob_end_clean(); throw $e;
