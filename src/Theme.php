@@ -185,7 +185,6 @@ class Theme implements ThemeContract
         $this->breadcrumb = $breadcrumb;
 
         //$this->theme = $this->getConfig('themeDefault');
-       // $this->theme($this->getConfig('defaultTheme'));
         $this->theme($this->getConfig('themeDefault'));
 
         //$this->layout = $this->getConfig('layoutDefault');
@@ -511,11 +510,11 @@ class Theme implements ThemeContract
         if (!$this->exists($theme)) {
             throw new UnknownThemeException("Theme [$theme] not found.");
         }
-        $this->addPathLocation($this->path($this->getConfig('defaultTheme')));
+
         // Add location to look up view.
         $this->addPathLocation($this->path());
 
-
+        $this->addPathLocation($this->getConfig('themeDefault'));
 
         // Fire event before set up a theme.
         $this->fire('before', $this);

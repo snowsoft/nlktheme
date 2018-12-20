@@ -125,6 +125,7 @@ class Breadcrumb {
 
         ob_start() and extract($data, EXTR_SKIP);
         try {
+
             eval('?>'.$parsed);
         } catch (\Exception $e) {
             ob_end_clean(); throw $e;
