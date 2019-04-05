@@ -13,7 +13,8 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "jeremeamia/superclosure": "^2.0"
+        "jeremeamia/superclosure": "^2.0",
+        "matthiasmullie/minify": "dev-master"
     },
     "require-dev": {
         "illuminate/support": ">=5.0.1"
