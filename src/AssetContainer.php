@@ -5,6 +5,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\HTML;
 use Illuminate\Support\Facades\Request;
+use MatthiasMullie\Minify;
 
 class AssetContainer {
 
@@ -204,6 +205,63 @@ class AssetContainer {
         }
     }
 
+
+
+    protected function minify($name)
+    {
+        $style = null;
+        $script =null;
+        $data = array();
+        if(is_array($name)):
+        $minifierCss = new Minify\CSS();
+        $minifierjs = new Minify\JS();
+
+
+        foreach ($name as $items):
+
+            if(strpos($items[1],'//') !== false)
+                $data[] = $items;
+            else
+                {
+
+           $type = (pathinfo(((isset($items[1]) and $items[1]) ? $items[1]: $items[0]), PATHINFO_EXTENSION) == 'css') ? 'style' : 'script';
+           if($type=="style")
+            {
+            $style .= $items[0].'-';
+            $minifierCss->add(base_path($this->getCurrentPath().((isset($items[1]) and $items[1]) ? $items[1]: $items[0])));
+            }
+           else
+           {
+            $script .= $items[0].'-';
+            $minifierjs->add(base_path($this->getCurrentPath().((isset($items[1]) and $items[1]) ? $items[1]: $items[0])));
+           }
+           }
+
+            endforeach;
+
+            if(!file_exists(base_path($this->getCurrentPath().config('theme.themeAssets').'/'.md5($script).'.min.js')))
+            $minifierjs->minify(base_path($this->getCurrentPath().config('theme.themeAssets').'/'.md5($script).'.min.js'));
+            if(!file_exists(base_path($this->getCurrentPath().config('theme.themeAssets').'/'.md5($style).'.min.css')))
+            $minifierCss->minify(base_path($this->getCurrentPath().config('theme.themeAssets').'/'.md5($style).'.min.css'));
+
+        return array_merge($data,[
+                [ $script,config('theme.themeAssets').'/'.md5($script).'.min.js'],
+                [ $style,config('theme.themeAssets').'/'.md5($style).'.min.css'],
+            ]);
+        else:
+        return $name;
+        endif;
+
+
+
+
+
+
+
+
+
+    }
+
     /**
      * Alias add an asset to container.
      *
@@ -215,6 +273,15 @@ class AssetContainer {
      */
     public function add($name, $source = null, $dependencies = array(), $attributes = array())
     {
+
+
+        $minify = config('theme.minify');
+
+
+        if($minify)  $name = $this->minify($name);
+
+
+
         if(!is_array($name)) {
             if(!isset($source)) throw new \ErrorException("Missing argument 2 for Nlk\Theme\AssetContainer::add()", 1);
             
@@ -222,6 +289,8 @@ class AssetContainer {
         }
 
         foreach ($name as $array) {
+
+
             if(count($array) < 2) throw new \ErrorException("Missing value 2 of the array for Nlk\Theme\AssetContainer::add()", 1);
             $container = $array[0];
             $source = $array[1]; 
@@ -255,6 +324,7 @@ class AssetContainer {
         if (array_key_exists($type, $types))
         {
             $type = $types[$type];
+
 
             $this->register($type, $name, $source, $dependencies, array());
         }
@@ -324,6 +394,7 @@ class AssetContainer {
         if ( ! array_key_exists('media', $attributes)) {
             $attributes['media'] = 'all';
         }
+
 
         // Prepend path to theme.
         if ($this->isUsePath()) {
