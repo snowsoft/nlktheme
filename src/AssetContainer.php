@@ -79,6 +79,8 @@ class AssetContainer {
 
             // Asset URL without index.
             $basePath = str_contains($base, $i) ? str_replace('/'.$i, '', $base) : $base;
+
+
         }
         else
         {
@@ -92,7 +94,7 @@ class AssetContainer {
             }
 
             // Get root URL.
-            $root  = Request::root();
+            $root  = Request::getScheme().'://'.request()->getHttpHost();
             $start = starts_with($root, 'http://') ? 'http://' : 'https://';
             $root  = preg_replace('~'.$start.'~', $scheme, $root, 1);
 
@@ -100,7 +102,7 @@ class AssetContainer {
             $basePath = str_contains($root, $i) ? str_replace('/'.$i, '', $root) : $root;
         }
 
-        return $basePath.'/'.$path;
+        return str_replace('index.php','',$basePath.'/'.str_replace('public/','',$path));
     }
 
     /**
@@ -137,7 +139,7 @@ class AssetContainer {
         return $this->configAssetUrl($path, $secure);
     }
 
-    
+
     /**
      * Return asset absolute path with current theme path.
      *
@@ -213,43 +215,43 @@ class AssetContainer {
         $script =null;
         $data = array();
         if(is_array($name)):
-        $minifierCss = new Minify\CSS();
-        $minifierjs = new Minify\JS();
+            $minifierCss = new Minify\CSS();
+            $minifierjs = new Minify\JS();
 
 
-        foreach ($name as $items):
+            foreach ($name as $items):
 
-            if(strpos($items[1],'//') !== false)
-                $data[] = $items;
-            else
+                if(strpos($items[1],'//') !== false)
+                    $data[] = $items;
+                else
                 {
 
-           $type = (pathinfo(((isset($items[1]) and $items[1]) ? $items[1]: $items[0]), PATHINFO_EXTENSION) == 'css') ? 'style' : 'script';
-           if($type=="style")
-            {
-            $style .= $items[0].'-';
-            $minifierCss->add(base_path($this->getCurrentPath().((isset($items[1]) and $items[1]) ? $items[1]: $items[0])));
-            }
-           else
-           {
-            $script .= $items[0].'-';
-            $minifierjs->add(base_path($this->getCurrentPath().((isset($items[1]) and $items[1]) ? $items[1]: $items[0])));
-           }
-           }
+                    $type = (pathinfo(((isset($items[1]) and $items[1]) ? $items[1]: $items[0]), PATHINFO_EXTENSION) == 'css') ? 'style' : 'script';
+                    if($type=="style")
+                    {
+                        $style .= $items[0].'-';
+                        $minifierCss->add(base_path($this->getCurrentPath().((isset($items[1]) and $items[1]) ? $items[1]: $items[0])));
+                    }
+                    else
+                    {
+                        $script .= $items[0].'-';
+                        $minifierjs->add(base_path($this->getCurrentPath().((isset($items[1]) and $items[1]) ? $items[1]: $items[0])));
+                    }
+                }
 
             endforeach;
 
             if(!file_exists(base_path($this->getCurrentPath().config('theme.themeAssets').'/'.md5($script).'.min.js')))
-            $minifierjs->minify(base_path($this->getCurrentPath().config('theme.themeAssets').'/'.md5($script).'.min.js'));
+                $minifierjs->minify(base_path($this->getCurrentPath().config('theme.themeAssets').'/'.md5($script).'.min.js'));
             if(!file_exists(base_path($this->getCurrentPath().config('theme.themeAssets').'/'.md5($style).'.min.css')))
-            $minifierCss->minify(base_path($this->getCurrentPath().config('theme.themeAssets').'/'.md5($style).'.min.css'));
+                $minifierCss->minify(base_path($this->getCurrentPath().config('theme.themeAssets').'/'.md5($style).'.min.css'));
 
-        return array_merge($data,[
+            return array_merge($data,[
                 [ $script,config('theme.themeAssets').'/'.md5($script).'.min.js'],
                 [ $style,config('theme.themeAssets').'/'.md5($style).'.min.css'],
             ]);
         else:
-        return $name;
+            return $name;
         endif;
 
 
@@ -269,7 +271,7 @@ class AssetContainer {
      * @param string $source
      * @param array  $dependencies
      * @param array  $attributes
-     * @return AssetContainer 
+     * @return AssetContainer
      */
     public function add($name, $source = null, $dependencies = array(), $attributes = array())
     {
@@ -284,7 +286,7 @@ class AssetContainer {
 
         if(!is_array($name)) {
             if(!isset($source)) throw new \ErrorException("Missing argument 2 for Nlk\Theme\AssetContainer::add()", 1);
-            
+
             return $this->added($name, $source, $dependencies, $attributes);
         }
 
@@ -293,7 +295,7 @@ class AssetContainer {
 
             if(count($array) < 2) throw new \ErrorException("Missing value 2 of the array for Nlk\Theme\AssetContainer::add()", 1);
             $container = $array[0];
-            $source = $array[1]; 
+            $source = $array[1];
             $dependencies = isset($array[2]) ? $array[2] : [];
             $attributes = isset($array[3]) ? $array[3] : [];
 
@@ -606,7 +608,7 @@ class AssetContainer {
         if($result=='/public') $source = substr($source, 7);
 
         $source = url($source);
-        
+
         switch ($group)
         {
             case 'script' :
