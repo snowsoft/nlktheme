@@ -678,7 +678,7 @@ class Theme implements ThemeContract
         // Buffer processes to save request.
         return Arr::get($this->bindings, $name, function() use (&$_events, &$_bindings, $name) {
             $response = current($_events->fire($name));
-            array_set($_bindings, $name, $response);
+            Arr::set($_bindings, $name, $response);
             return $response;
         });
     }
@@ -810,7 +810,7 @@ class Theme implements ThemeContract
             }
 
             $instance = $reflector->newInstance($this, $this->config, $this->view);
-            array_set($widgets, $className, $instance);
+            Arr::set($widgets, $className, $instance);
         }
 
         $instance->setAttributes($attributes);
