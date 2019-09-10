@@ -1,6 +1,8 @@
-<?php namespace Nlk\Theme;
+<?php
+namespace Nlk\Theme;
 
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Arr;
 
 class Manifest
 {
@@ -93,7 +95,7 @@ class Manifest
 	 */
 	public function getProperty($key, $default = null)
 	{
-		return array_get($this->getJsonContents(), $key, $default);
+		return Arr::get($this->getJsonContents(), $key, $default);
 	}
 
 	/**
