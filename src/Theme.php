@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Cookie;
 use Nlk\Theme\Contracts\Theme as ThemeContract;
 use Nlk\Theme\Manifest;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 class Theme implements ThemeContract
 {

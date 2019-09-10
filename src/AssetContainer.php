@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\HTML;
 use Illuminate\Support\Facades\Request;
 use MatthiasMullie\Minify;
+use Illuminate\Support\Str;
 
 class AssetContainer {
 
@@ -78,7 +79,7 @@ class AssetContainer {
             $base = rtrim($assetUrl, '/');
 
             // Asset URL without index.
-            $basePath = str_contains($base, $i) ? str_replace('/'.$i, '', $base) : $base;
+            $basePath = Str:contains($base, $i) ? str_replace('/'.$i, '', $base) : $base;
 
 
         }
@@ -99,7 +100,7 @@ class AssetContainer {
             $root  = preg_replace('~'.$start.'~', $scheme, $root, 1);
 
             // Asset URL without index.
-            $basePath = str_contains($root, $i) ? str_replace('/'.$i, '', $root) : $root;
+            $basePath = Str:contains($root, $i) ? str_replace('/'.$i, '', $root) : $root;
         }
 
         return str_replace('index.php','',$basePath.'/'.str_replace('public/','',$path));
