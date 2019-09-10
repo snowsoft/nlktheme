@@ -14,7 +14,8 @@
     "require": {
         "php": ">=7.2",
         "jeremeamia/superclosure": "^2.0",
-        "matthiasmullie/minify": "dev-master"
+        "matthiasmullie/minify": "dev-master",
+        "laravel/framework": "^6.0"
     },
     "require-dev": {
         "illuminate/support": ">=5.0.1"
