@@ -15,7 +15,7 @@
         "php": ">=7.2",
         "jeremeamia/superclosure": "^2.0",
         "matthiasmullie/minify": "dev-master",
-        "laravel/framework": "^6.0|^7.0"
+        "laravel/framework": "^6.0|^7.0|^8.0"
     },
     "require-dev": {
 
