@@ -12,10 +12,10 @@
         }
     ],
     "require": {
-        "php": ">=7.2",
+        "php": ">=7.3",
         "jeremeamia/superclosure": "^2.0",
         "matthiasmullie/minify": "dev-master",
-        "laravel/framework": "^6.0|^7.0|^8.0|^9.0"
+        "laravel/framework": "^8.0|^9.0"
     },
     "require-dev": {
 
