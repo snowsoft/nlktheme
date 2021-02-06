@@ -207,6 +207,12 @@ class AssetContainer {
         }
     }
 
+    
+    protected function cleanV($item)
+    {
+        $item = explode("?",$item);
+        return $item[0];
+    }
 
 
     protected function minify($name)
@@ -230,12 +236,12 @@ class AssetContainer {
                     if($type=="style")
                     {
                         $style .= $items[0].'-';
-                        $minifierCss->add(base_path($this->getCurrentPath().((isset($items[1]) and $items[1]) ? $items[1]: $items[0])));
+                        $minifierCss->add(base_path($this->getCurrentPath().((isset($items[1]) and $items[1]) ? $this->cleanV($items[1]): $this->cleanV($items[0]))));
                     }
                     else
                     {
                         $script .= $items[0].'-';
-                        $minifierjs->add(base_path($this->getCurrentPath().((isset($items[1]) and $items[1]) ? $items[1]: $items[0])));
+                        $minifierjs->add(base_path($this->getCurrentPath().((isset($items[1]) and $items[1]) ? $this->cleanV($items[1]): $this->cleanV($items[0]))));
                     }
                 }
 
