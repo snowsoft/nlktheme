@@ -195,7 +195,7 @@ class AssetContainer {
         }
         else
         {
-            $type = (pathinfo($source, PATHINFO_EXTENSION) == 'css') ? 'style' : 'script';
+            $type = (pathinfo($this->cleanV($source), PATHINFO_EXTENSION) == 'css') ? 'style' : 'script';
 
             // Remove unnecessary slashes from internal path.
             if ( ! preg_match('|^//|', $source))
@@ -207,7 +207,7 @@ class AssetContainer {
         }
     }
 
-    
+
     protected function cleanV($item)
     {
         $item = explode("?",$item);
@@ -232,7 +232,7 @@ class AssetContainer {
                 else
                 {
 
-                    $type = (pathinfo(((isset($items[1]) and $items[1]) ? $items[1]: $items[0]), PATHINFO_EXTENSION) == 'css') ? 'style' : 'script';
+                    $type = (pathinfo(((isset($items[1]) and $items[1]) ? $this->cleanV($items[1]):$this->cleanV($items[0])), PATHINFO_EXTENSION) == 'css') ? 'style' : 'script';
                     if($type=="style")
                     {
                         $style .= $items[0].'-';
@@ -618,7 +618,7 @@ class AssetContainer {
         switch ($group)
         {
             case 'script' :
-                $attributes['src'] = $source;
+                $attributes['src'] = $source.'?v='.config('theme.version');
 
                 return '<script'.$this->attributes($attributes).'></script>'.PHP_EOL;
             case 'style' :
@@ -627,7 +627,7 @@ class AssetContainer {
 
                 $attributes = $attributes + $defaults;
 
-                $attributes['href'] = $source;
+                $attributes['href'] = $source.'?v='.config('theme.version');
 
                 return '<link'.$this->attributes($attributes).'>'.PHP_EOL;
         }
