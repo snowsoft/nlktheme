@@ -1,6 +1,6 @@
 <?php
 
-$serializer = new SuperClosure\Serializer;
+ 
 
 return array(
 
@@ -87,26 +87,7 @@ return array(
 	*/
 
 	'events' => array(
-
-		// Before all event, this event will effect for global.
-		'before' => $serializer->serialize(function($theme)
-		{
-			//$theme->setTitle('Something in global.');
-		}),
-
-		// This event will fire as a global you can add any assets you want here.
-		'asset' => $serializer->serialize(function($asset)
-		{
-			// Preparing asset you need to serve after.
-            $asset->cook('backbone', function($asset)
-            {
-                $asset->add('backbone', '//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.0.0/backbone-min.js');
-                $asset->add('underscorejs', '//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js');
-            });
-
-            // To use cook 'backbone' you can fire with 'serve' method.
-            // Theme::asset()->serve('backbone');
-		})
+ 
 
 	),
 
