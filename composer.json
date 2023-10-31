@@ -15,7 +15,7 @@
         "php": ">=7.3",
  
         "matthiasmullie/minify": "*",
-        "laravel/framework": "^10.0"
+        "laravel/framework": ">=9.0"
  
     },
     "require-dev": {
