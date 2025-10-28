@@ -557,6 +557,18 @@ class Theme implements ThemeContract
         // Add location to look up view.
         $this->addPathLocation($this->path());
 
+        // Add defaultTheme namespace if enabled
+        $useDefaultTheme = $this->getConfig('useDefaultThemeFallback', false);
+        if ($useDefaultTheme) {
+            $defaultTheme = $this->getConfig('defaultTheme');
+            if ($defaultTheme && $defaultTheme != $this->getThemeName()) {
+                $defaultThemePath = base_path($this->path($defaultTheme));
+                if ($this->files->isDirectory($defaultThemePath)) {
+                    $this->view->addNamespace('theme.'.$defaultTheme, $defaultThemePath);
+                }
+            }
+        }
+
         // Fire event before set up a theme.
         $this->fire('before', $this);
 
@@ -794,6 +806,22 @@ class Theme implements ThemeContract
         $path = $partialDir.'.'.$view;
 
         if (! $this->view->exists($path)) {
+            // Try to load from defaultTheme if enabled
+            $useDefaultTheme = $this->getConfig('useDefaultThemeFallback', false);
+            if ($useDefaultTheme) {
+                $defaultTheme = $this->getConfig('defaultTheme');
+                if ($defaultTheme && $defaultTheme != $this->getThemeName()) {
+                    $defaultThemeNamespace = 'theme.'.$defaultTheme.'.'.$partialDir;
+                    $defaultPath = $defaultThemeNamespace.'.'.$view;
+                    
+                    if ($this->view->exists($defaultPath)) {
+                        $partial = $this->view->make($defaultPath, $args)->render();
+                        $this->regions[$view] = $partial;
+                        return $this->regions[$view];
+                    }
+                }
+            }
+            
             throw new UnknownPartialFileException("Partial view [$view] not found.");
         }
 
@@ -1082,7 +1110,24 @@ class Theme implements ThemeContract
         // Add namespace to find in a theme path.
         $path = $this->getThemeNamespace('views.'.$view);
 
-        return $this->of($path, $args, $type);
+        try {
+            return $this->of($path, $args, $type);
+        } catch (\InvalidArgumentException $e) {
+            // Try to load from defaultTheme if enabled
+            $useDefaultTheme = $this->getConfig('useDefaultThemeFallback', false);
+            if ($useDefaultTheme) {
+                $defaultTheme = $this->getConfig('defaultTheme');
+                if ($defaultTheme && $defaultTheme != $this->getThemeName()) {
+                    $defaultPath = 'theme.'.$defaultTheme.'.views.'.$view;
+                    
+                    if ($this->view->exists($defaultPath)) {
+                        return $this->of($defaultPath, $args, $type);
+                    }
+                }
+            }
+            
+            throw $e;
+        }
     }
 
     /**
