@@ -19,6 +19,21 @@ return array(
 
 	'defaultTheme' => 'default',
 	
+	/*
+	|--------------------------------------------------------------------------
+	| Use Default Theme Fallback
+	|--------------------------------------------------------------------------
+	|
+	| If set to true, when a file is not found in the current theme,
+	| it will try to find it in the defaultTheme before falling back
+	| to regular Laravel views.
+	|
+	| Set to false to prevent automatic fallback to defaultTheme.
+	|
+	*/
+	
+	'useDefaultThemeFallback' => true,
+	
 	'version' => '000.1',
 
 	/*
@@ -75,6 +90,42 @@ return array(
 	
 	
 	'minify' => false,
+
+	/*
+	|--------------------------------------------------------------------------
+	| Template Caching
+	|--------------------------------------------------------------------------
+	|
+	| Enable template compilation caching for better performance.
+	| Cache will be automatically cleared when templates are modified.
+	|
+	*/
+
+	'templateCacheEnabled' => env('APP_THEME_CACHE', true),
+
+	/*
+	|--------------------------------------------------------------------------
+	| Template Auto Reload
+	|--------------------------------------------------------------------------
+	|
+	| In development, automatically reload templates when they change.
+	| This feature only works when APP_DEBUG is true.
+	|
+	*/
+
+	'autoReload' => env('APP_DEBUG', false),
+
+	/*
+	|--------------------------------------------------------------------------
+	| Default Template Engine
+	|--------------------------------------------------------------------------
+	|
+	| Supported: 'blade', 'twig', 'smarty', 'plain'
+	| Currently only 'blade' is fully implemented.
+	|
+	*/
+
+	'defaultEngine' => 'blade',
 
 	/*
 	|--------------------------------------------------------------------------

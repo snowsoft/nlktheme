@@ -14,6 +14,7 @@ use Nlk\Theme\Contracts\Theme as ThemeContract;
 use Nlk\Theme\Manifest;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Cache;
 
 class Theme implements ThemeContract
 {
@@ -149,6 +150,34 @@ class Theme implements ThemeContract
      * @var array
      */
     protected $compilers = array();
+
+    /**
+     * Theme components stack.
+             *
+     * @var array
+     */
+    protected $components = array();
+
+    /**
+     * Theme sections.
+     *
+     * @var array
+     */
+    protected $sections = array();
+
+    /**
+     * Theme stacks.
+     *
+     * @var array
+     */
+    protected $stacks = array();
+
+    /**
+     * Global theme data.
+     *
+     * @var array
+     */
+    protected $themeData = array();
 
     /**
      * Create a new theme instance.
@@ -471,6 +500,18 @@ class Theme implements ThemeContract
 
             if ($this->files->isDirectory($inheritPath)) {
                 array_push($hints, $inheritPath);
+            }
+        }
+
+        // Add defaultTheme as fallback if configured
+        $useDefaultTheme = $this->getConfig('useDefaultThemeFallback', false);
+        if ($useDefaultTheme) {
+            $defaultTheme = $this->getConfig('defaultTheme');
+            if ($defaultTheme && $defaultTheme != $this->getThemeName()) {
+                $defaultThemePath = base_path($this->path($defaultTheme));
+                if ($this->files->isDirectory($defaultThemePath)) {
+                    array_push($hints, $defaultThemePath);
+                }
             }
         }
 
@@ -1249,6 +1290,335 @@ class Theme implements ThemeContract
         }
 
         return $content;
+    }
+
+    /**
+     * Clear all compiled templates cache.
+     *
+     * @return void
+     */
+    public function clearCache()
+    {
+        $cachePath = storage_path('framework/views');
+        
+        if ($this->files->isDirectory($cachePath)) {
+            $files = $this->files->files($cachePath);
+            
+            foreach ($files as $file) {
+                $this->files->delete($file);
+            }
+        }
+    }
+
+    /**
+     * Clear specific theme's compiled templates.
+     *
+     * @param  string|null $theme
+     * @return void
+     */
+    public function clearThemeCache($theme = null)
+    {
+        $theme = $theme ?: $this->getThemeName();
+        $cachePath = storage_path('framework/views');
+        
+        if ($this->files->isDirectory($cachePath)) {
+            $files = $this->files->files($cachePath);
+            
+            foreach ($files as $file) {
+                $content = $this->files->get($file);
+                if (strpos($content, $theme) !== false) {
+                    $this->files->delete($file);
+                }
+            }
+        }
+    }
+
+    /**
+     * Reload theme configuration and clear cache.
+     *
+     * @return $this
+     */
+    public function reload()
+    {
+        if ($this->getConfig('autoReload')) {
+            $this->clearThemeCache();
+            // Reset theme config to force reload
+            $this->themeConfig = null;
+        }
+        
+        return $this;
+    }
+
+    /**
+     * Get compiled template path.
+     *
+     * @param  string $view
+     * @return string|null
+     */
+    public function getCompiledPath($view)
+    {
+        try {
+            $compiler = $this->getCompiler('blade');
+            $finder = $this->view->getFinder();
+            
+            if ($this->view->exists($view)) {
+                $path = $finder->find($view);
+                return $compiler->getCompiledPath($path);
+            }
+        } catch (\Exception $e) {
+            return null;
+        }
+        
+        return null;
+    }
+
+    /**
+     * Check if view exists in any theme.
+     *
+     * @param  string $view
+     * @return boolean
+     */
+    public function viewExists($view)
+    {
+        try {
+            return $this->view->exists($view);
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Get all views in current theme.
+     *
+     * @return array
+     */
+    public function getThemeViews()
+    {
+        $themePath = $this->getThemePath() . 'views';
+        $views = [];
+        
+        if ($this->files->isDirectory($themePath)) {
+            $files = $this->files->allFiles($themePath);
+            
+            foreach ($files as $file) {
+                $relativePath = str_replace($themePath . '/', '', $file->getRelativePathname());
+                $viewName = str_replace(['/', '.blade.php'], ['.', ''], $relativePath);
+                $views[] = $viewName;
+            }
+        }
+        
+        return $views;
+    }
+
+    /**
+     * Compile and cache a template string.
+     *
+     * @param  string $content
+     * @param  array  $data
+     * @param  string $cacheKey
+     * @param  int    $ttl
+     * @return string
+     */
+    public function compileAndCache($content, $data = [], $cacheKey = null, $ttl = 3600)
+    {
+        $cacheKey = $cacheKey ?: md5($content);
+        
+        return Cache::remember("theme.compiled.{$cacheKey}", $ttl, function() use ($content, $data) {
+            return $this->blader($content, $data);
+        });
+    }
+
+    /**
+     * Start a section.
+     *
+     * @param  string $section
+     * @param  string $content
+     * @return void
+     */
+    public function startSection($section, $content = '')
+    {
+        ob_start();
+        $this->sections[$section] = $content;
+    }
+
+    /**
+     * Stop a section and append to existing content.
+     *
+     * @param  string $section
+     * @return void
+     */
+    public function appendSection($section)
+    {
+        if (isset($this->sections[$section])) {
+            $this->sections[$section] .= ob_get_clean();
+        } else {
+            $this->sections[$section] = ob_get_clean();
+        }
+    }
+
+    /**
+     * Stop a section and replace existing content.
+     *
+     * @param  string $section
+     * @return void
+     */
+    public function stopSection($section)
+    {
+        if (isset($this->sections[$section])) {
+            $this->sections[$section] = ob_get_clean();
+        } else {
+            $this->sections[$section] = ob_get_clean();
+        }
+    }
+
+    /**
+     * Get section content.
+     *
+     * @param  string $section
+     * @param  string $default
+     * @return string
+     */
+    public function getSection($section, $default = '')
+    {
+        return isset($this->sections[$section]) ? $this->sections[$section] : $default;
+    }
+
+    /**
+     * Check if section exists.
+     *
+     * @param  string $section
+     * @return boolean
+     */
+    public function hasSection($section)
+    {
+        return isset($this->sections[$section]);
+    }
+
+    /**
+     * Start a stack.
+     *
+     * @param  string $name
+     * @return void
+     */
+    public function startStack($name)
+    {
+        if (!isset($this->stacks[$name])) {
+            $this->stacks[$name] = [];
+        }
+        ob_start();
+    }
+
+    /**
+     * Push to stack.
+     *
+     * @param  string $name
+     * @return void
+     */
+    public function pushStack($name)
+    {
+        $this->stacks[$name][] = ob_get_clean();
+    }
+
+    /**
+     * Get stack content.
+     *
+     * @param  string $name
+     * @return string
+     */
+    public function getStack($name)
+    {
+        return isset($this->stacks[$name]) ? implode('', $this->stacks[$name]) : '';
+    }
+
+    /**
+     * Clear stack.
+     *
+     * @param  string $name
+     * @return void
+     */
+    public function clearStack($name)
+    {
+        unset($this->stacks[$name]);
+    }
+
+    /**
+     * Register a component.
+     *
+     * @param  string $name
+     * @param  string $view
+     * @return void
+     */
+    public function component($name, $view)
+    {
+        $this->components[$name] = $view;
+    }
+
+    /**
+     * Render a component.
+     *
+     * @param  string $name
+     * @param  array  $data
+     * @return string
+     */
+    public function renderComponent($name, $data = [])
+    {
+        if (!isset($this->components[$name])) {
+            return '';
+        }
+
+        $view = $this->components[$name];
+        $partialDir = $this->getThemeNamespace('components');
+        
+        return $this->loadPartial($view, $partialDir, $data);
+    }
+
+    /**
+     * Set global theme data.
+     *
+     * @param  string $key
+     * @param  mixed  $value
+     * @return $this
+     */
+    public function setData($key, $value)
+    {
+        $this->themeData[$key] = $value;
+        
+        return $this;
+    }
+
+    /**
+     * Get global theme data.
+     *
+     * @param  string $key
+     * @param  mixed  $default
+     * @return mixed
+     */
+    public function getData($key, $default = null)
+    {
+        return Arr::get($this->themeData, $key, $default);
+    }
+
+    /**
+     * Get all global theme data.
+     *
+     * @return array
+     */
+    public function getAllData()
+    {
+        return $this->themeData;
+    }
+
+    /**
+     * Set multiple global theme data.
+     *
+     * @param  array $data
+     * @return $this
+     */
+    public function setMultipleData(array $data)
+    {
+        $this->themeData = array_merge($this->themeData, $data);
+        
+        return $this;
     }
 
     /**

@@ -56,3 +56,233 @@ if (!function_exists('meta_init')){
 		'<meta name="viewport" content="width=device-width, initial-scale=1">';
 	}
 }
+
+if (!function_exists('theme_asset')){
+	/**
+	 * Get theme asset URL.
+	 *
+	 * @param  string $path
+	 * @return string
+	 */
+	function theme_asset($path) {
+		return \Nlk\Theme\Helpers\ThemeHelper::assetUrl($path);
+	}
+}
+
+if (!function_exists('theme_css')){
+	/**
+	 * Include a CSS file from theme.
+	 *
+	 * @param  string $path
+	 * @param  string $media
+	 * @return string
+	 */
+	function theme_css($path, $media = 'all') {
+		return \Nlk\Theme\Helpers\ThemeHelper::css($path, $media);
+	}
+}
+
+if (!function_exists('theme_js')){
+	/**
+	 * Include a JavaScript file from theme.
+	 *
+	 * @param  string $path
+	 * @param  boolean $defer
+	 * @return string
+	 */
+	function theme_js($path, $defer = false) {
+		return \Nlk\Theme\Helpers\ThemeHelper::js($path, $defer);
+	}
+}
+
+if (!function_exists('theme_image')){
+	/**
+	 * Get theme image tag.
+	 *
+	 * @param  string $path
+	 * @param  string $alt
+	 * @param  array  $attributes
+	 * @return string
+	 */
+	function theme_image($path, $alt = '', $attributes = []) {
+		return \Nlk\Theme\Helpers\ThemeHelper::image($path, $alt, $attributes);
+	}
+}
+
+if (!function_exists('active_class')){
+	/**
+	 * Get active class for navigation.
+	 *
+	 * @param  string $path
+	 * @param  string $active
+	 * @return string
+	 */
+	function active_class($path, $active = 'active') {
+		return \Nlk\Theme\Helpers\ThemeHelper::active($path, $active);
+	}
+}
+
+if (!function_exists('theme_truncate')){
+	/**
+	 * Truncate string with ellipsis.
+	 *
+	 * @param  string  $string
+	 * @param  integer $limit
+	 * @param  string  $append
+	 * @return string
+	 */
+	function theme_truncate($string, $limit = 100, $append = '...') {
+		return \Nlk\Theme\Helpers\ThemeHelper::truncate($string, $limit, $append);
+	}
+}
+
+if (!function_exists('theme_cache_clear')){
+	/**
+	 * Clear theme cache.
+	 *
+	 * @param  string|null $theme
+	 * @return void
+	 */
+	function theme_cache_clear($theme = null) {
+		if (function_exists('theme')) {
+			if ($theme) {
+				theme()->clearThemeCache($theme);
+			} else {
+				theme()->clearCache();
+			}
+		}
+	}
+}
+
+if (!function_exists('has_theme_view')){
+	/**
+	 * Check if view exists in theme.
+	 *
+	 * @param  string $view
+	 * @return boolean
+	 */
+	function has_theme_view($view) {
+		return \Nlk\Theme\Helpers\ThemeHelper::hasView($view);
+	}
+}
+
+if (!function_exists('render_if_exists')){
+	/**
+	 * Render a partial if it exists.
+	 *
+	 * @param  string $view
+	 * @param  array  $args
+	 * @param  mixed  $default
+	 * @return string
+	 */
+	function render_if_exists($view, $args = [], $default = '') {
+		return \Nlk\Theme\Helpers\ThemeHelper::renderIfExists($view, $args, $default);
+	}
+}
+
+if (!function_exists('time_ago')){
+	/**
+	 * Get human readable time difference.
+	 *
+	 * @param  datetime $datetime
+	 * @return string
+	 */
+	function time_ago($datetime) {
+		return \Nlk\Theme\Helpers\ThemeHelper::timeAgo($datetime);
+	}
+}
+
+if (!function_exists('number_format_short')){
+	/**
+	 * Format number with suffix.
+	 *
+	 * @param  integer $number
+	 * @return string
+	 */
+	function number_format_short($number) {
+		return \Nlk\Theme\Helpers\ThemeHelper::numberFormat($number);
+	}
+}
+
+if (!function_exists('theme_section')){
+	/**
+	 * Get section content.
+	 *
+	 * @param  string $section
+	 * @param  string $default
+	 * @return string
+	 */
+	function theme_section($section, $default = '') {
+		return theme()->getSection($section, $default);
+	}
+}
+
+if (!function_exists('has_theme_section')){
+	/**
+	 * Check if section exists.
+	 *
+	 * @param  string $section
+	 * @return boolean
+	 */
+	function has_theme_section($section) {
+		return theme()->hasSection($section);
+	}
+}
+
+if (!function_exists('theme_component')){
+	/**
+	 * Register or render a component.
+	 *
+	 * @param  string $name
+	 * @param  string|null $view
+	 * @param  array  $data
+	 * @return mixed
+	 */
+	function theme_component($name, $view = null, $data = []) {
+		if ($view) {
+			// Register component
+			theme()->component($name, $view);
+			return null;
+		}
+		// Render component
+		return theme()->renderComponent($name, $data);
+	}
+}
+
+if (!function_exists('theme_set')){
+	/**
+	 * Set theme data.
+	 *
+	 * @param  string $key
+	 * @param  mixed  $value
+	 * @return object
+	 */
+	function theme_set($key, $value) {
+		return theme()->setData($key, $value);
+	}
+}
+
+if (!function_exists('theme_get')){
+	/**
+	 * Get theme data.
+	 *
+	 * @param  string $key
+	 * @param  mixed  $default
+	 * @return mixed
+	 */
+	function theme_get($key, $default = null) {
+		return theme()->getData($key, $default);
+	}
+}
+
+if (!function_exists('theme_stack')){
+	/**
+	 * Get stack content.
+	 *
+	 * @param  string $name
+	 * @return string
+	 */
+	function theme_stack($name) {
+		return theme()->getStack($name);
+	}
+}
