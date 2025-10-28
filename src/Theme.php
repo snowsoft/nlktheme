@@ -1108,7 +1108,9 @@ class Theme implements ThemeContract
     public function scope($view, $args = array(), $type = null)
     {
         // Add namespace to find in a theme path.
-        $path = $this->getThemeNamespace('views.'.$view);
+        // $view could be 'odeme.odeme' or 'odeme/odeme'
+        $viewPath = str_replace('.', '/', $view);
+        $path = $this->getThemeNamespace($viewPath);
 
         try {
             return $this->of($path, $args, $type);
@@ -1118,10 +1120,15 @@ class Theme implements ThemeContract
             if ($useDefaultTheme) {
                 $defaultTheme = $this->getConfig('defaultTheme');
                 if ($defaultTheme && $defaultTheme != $this->getThemeName()) {
-                    $defaultPath = 'theme.'.$defaultTheme.'.views.'.$view;
+                    $defaultViewPath = str_replace('.', '/', $view);
+                    $defaultPath = 'theme.'.$defaultTheme.'::'.$defaultViewPath;
                     
-                    if ($this->view->exists($defaultPath)) {
-                        return $this->of($defaultPath, $args, $type);
+                    try {
+                        if ($this->view->exists($defaultPath)) {
+                            return $this->of($defaultPath, $args, $type);
+                        }
+                    } catch (\Exception $defaultException) {
+                        // Continue to throw original exception
                     }
                 }
             }
