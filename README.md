@@ -21,7 +21,7 @@ Laravel için kapsamlı bir tema yönetim paketi. Birden fazla tema desteği, co
 ## Kurulum
 
 ```bash
-composer require nlk/theme
+composer require snowsoft/nlktheme
 ```
 
 ## Temel Kullanım
@@ -469,7 +469,7 @@ public function index()
 - `theme_stack($name)` - Stack get
 - `active_class($path, $active)` - Active class
 - `theme_truncate($text, $limit)` - Truncate
-經歷 `time_ago($datetime)` - Time ago
+- `time_ago($datetime)` - Time ago
 - `number_format_short($number)` - Short number
 - `theme_cache_clear($theme)` - Clear cache
 - `has_theme_view($view)` - Check view exists
@@ -477,6 +477,29 @@ public function index()
 - `render_if_exists($view, $args, $default)` - Render if exists
 - `theme_set($key, $value)` - Set theme data
 - `theme_get($key, $default)` - Get theme data
+
+## Artisan Komutları
+
+Paket, tema yönetimi için çeşitli Artisan komutları sunar:
+
+```bash
+# Tema oluştur
+php artisan theme:create mytheme
+
+# Temaları listele
+php artisan theme:list
+
+# Temayı kopyala
+php artisan theme:duplicate default newtheme
+
+# Temayı sil
+php artisan theme:destroy oldtheme
+
+# Widget oluştur
+php artisan theme:widget ProductSlider
+```
+
+Detaylı kullanım için [Artisan Komutları Dokümantasyonu](docs/ARTISAN_COMMANDS.md) dosyasına bakın.
 
 ## Gelişmiş Özellikler
 
