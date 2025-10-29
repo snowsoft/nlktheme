@@ -351,3 +351,80 @@ if (!function_exists('theme_inertia')){
 		return \Nlk\Theme\Support\InertiaSupport::render($component, $props);
 	}
 }
+
+if (!function_exists('theme_schema')){
+	/**
+	 * Generate JSON-LD schema script tag.
+	 *
+	 * @param  array $schema
+	 * @return string
+	 */
+	function theme_schema(array $schema) {
+		return \Nlk\Theme\SEO\SchemaGenerator::jsonLd($schema);
+	}
+}
+
+if (!function_exists('theme_product_schema')){
+	/**
+	 * Generate Product schema.
+	 *
+	 * @param  array $data
+	 * @return string
+	 */
+	function theme_product_schema(array $data) {
+		$schema = \Nlk\Theme\SEO\ProductSchema::generate($data);
+		return \Nlk\Theme\SEO\SchemaGenerator::jsonLd($schema);
+	}
+}
+
+if (!function_exists('theme_organization_schema')){
+	/**
+	 * Generate Organization schema.
+	 *
+	 * @param  array $data
+	 * @return string
+	 */
+	function theme_organization_schema(array $data) {
+		$schema = \Nlk\Theme\SEO\SchemaGenerator::organization($data);
+		return \Nlk\Theme\SEO\SchemaGenerator::jsonLd($schema);
+	}
+}
+
+if (!function_exists('theme_breadcrumb_schema')){
+	/**
+	 * Generate BreadcrumbList schema.
+	 *
+	 * @param  array $items
+	 * @return string
+	 */
+	function theme_breadcrumb_schema(array $items) {
+		$schema = \Nlk\Theme\SEO\SchemaGenerator::breadcrumbList($items);
+		return \Nlk\Theme\SEO\SchemaGenerator::jsonLd($schema);
+	}
+}
+
+if (!function_exists('theme_article_schema')){
+	/**
+	 * Generate Article schema.
+	 *
+	 * @param  array $data
+	 * @return string
+	 */
+	function theme_article_schema(array $data) {
+		$schema = \Nlk\Theme\SEO\SchemaGenerator::article($data);
+		return \Nlk\Theme\SEO\SchemaGenerator::jsonLd($schema);
+	}
+}
+
+if (!function_exists('theme_video_schema')){
+	/**
+	 * Generate Video schema.
+	 *
+	 * @param  array $data
+	 * @return string
+	 */
+	function theme_video_schema(array $data) {
+		$schema = \Nlk\Theme\SEO\SchemaGenerator::video($data);
+		return \Nlk\Theme\SEO\SchemaGenerator::jsonLd($schema);
+	}
+}

@@ -477,6 +477,12 @@ public function index()
 - `render_if_exists($view, $args, $default)` - Render if exists
 - `theme_set($key, $value)` - Set theme data
 - `theme_get($key, $default)` - Get theme data
+- `theme_schema($schema)` - Generate JSON-LD schema
+- `theme_product_schema($data)` - Generate Product schema
+- `theme_organization_schema($data)` - Generate Organization schema
+- `theme_breadcrumb_schema($items)` - Generate BreadcrumbList schema
+- `theme_article_schema($data)` - Generate Article schema
+- `theme_video_schema($data)` - Generate Video schema
 
 ## Artisan Komutları
 
@@ -521,6 +527,11 @@ Paket artık modern frontend framework'leri ve gelişmiş güvenlik özellikleri
 Detaylı dokümantasyon için:
 - [Hızlı Başlangıç](docs/QUICK_START.md)
 - [Gelişmiş Özellikler](docs/ADVANCED_FEATURES.md)
+- [Artisan Komutları](docs/ARTISAN_COMMANDS.md)
+- [Page Builder](docs/PAGE_BUILDER.md)
+- [SEO & Rich Snippets](docs/SEO_RICH_SNIPPETS.md)
+- [Sorun Giderme](docs/TROUBLESHOOTING.md)
+- [Gelecekteki Özellikler](docs/FUTURE_FEATURES.md)
 
 ## License
 

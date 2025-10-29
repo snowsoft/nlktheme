@@ -44,7 +44,7 @@ base_path/
 ```php
 use Theme;
 
-// Mek2temei set edin
+// Tema set edin
 Theme::uses('tema2');
 
 // Namespace'in kayıtlı olduğunu kontrol edin
