@@ -1107,10 +1107,16 @@ class Theme implements ThemeContract
      */
     public function scope($view, $args = array(), $type = null)
     {
-        // Add namespace to find in a theme path.
-        // $view could be 'odeme.odeme' or 'odeme/odeme'
-        $viewPath = str_replace('.', '/', $view);
-        $path = $this->getThemeNamespace($viewPath);
+        // Check if view already has a namespace (contains ::)
+        // If it does, use it directly without adding namespace
+        if (strpos($view, '::') !== false) {
+            $path = $view;
+        } else {
+            // Add namespace to find in a theme path.
+            // $view could be 'odeme.odeme' or 'odeme/odeme'
+            $viewPath = str_replace('.', '/', $view);
+            $path = $this->getThemeNamespace($viewPath);
+        }
 
         try {
             return $this->of($path, $args, $type);
@@ -1120,7 +1126,10 @@ class Theme implements ThemeContract
             if ($useDefaultTheme) {
                 $defaultTheme = $this->getConfig('defaultTheme');
                 if ($defaultTheme && $defaultTheme != $this->getThemeName()) {
-                    $defaultViewPath = str_replace('.', '/', $view);
+                    // If original view had namespace, extract just the view part
+                    $defaultViewPath = strpos($view, '::') !== false 
+                        ? substr($view, strpos($view, '::') + 2)
+                        : str_replace('.', '/', $view);
                     $defaultPath = 'theme.'.$defaultTheme.'::'.$defaultViewPath;
                     
                     try {
