@@ -142,4 +142,77 @@ return array(
 
 	),
 
+	/*
+	|--------------------------------------------------------------------------
+	| Security Settings
+	|--------------------------------------------------------------------------
+	|
+	| Security configurations for XSS protection, CSP headers, and path validation.
+	|
+	*/
+
+	'security' => array(
+		// Enable security headers
+		'headers' => env('THEME_SECURITY_HEADERS', true),
+
+		// Content Security Policy
+		'csp' => array(
+			'enabled' => env('THEME_CSP_ENABLED', false),
+			'directives' => array(
+				'default-src' => "'self'",
+				'script-src' => "'self' 'unsafe-inline' 'unsafe-eval'",
+				'style-src' => "'self' 'unsafe-inline'",
+				'img-src' => "'self' data: https:",
+				'font-src' => "'self' data:",
+				'connect-src' => "'self'",
+				'frame-ancestors' => "'none'",
+			),
+		),
+
+		// Security headers configuration
+		'headers_config' => array(
+			'x_content_type' => true,
+			'x_frame_options' => true,
+			'x_frame_options_value' => 'DENY',
+			'x_xss_protection' => true,
+			'referrer_policy' => true,
+			'referrer_policy_value' => 'strict-origin-when-cross-origin',
+			'permissions_policy' => false,
+			'permissions_policy_value' => '',
+		),
+
+		// Enable view path validation
+		'validate_view_paths' => env('THEME_VALIDATE_VIEW_PATHS', true),
+	),
+
+	/*
+	|--------------------------------------------------------------------------
+	| Frontend Framework Support
+	|--------------------------------------------------------------------------
+	|
+	| Enable support for modern frontend frameworks like Livewire, React, Inertia.
+	|
+	*/
+
+	'frontend' => array(
+		// Livewire support
+		'livewire' => array(
+			'enabled' => env('THEME_LIVEWIRE_ENABLED', false),
+			'auto_detect' => true,
+		),
+
+		// React + SSR support
+		'react' => array(
+			'enabled' => env('THEME_REACT_ENABLED', false),
+			'ssr_enabled' => env('THEME_REACT_SSR_ENABLED', false),
+			'vite_entry' => 'resources/js/app.jsx',
+		),
+
+		// Inertia.js support
+		'inertia' => array(
+			'enabled' => env('THEME_INERTIA_ENABLED', false),
+			'auto_detect' => true,
+		),
+	),
+
 );

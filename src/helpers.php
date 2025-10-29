@@ -286,3 +286,68 @@ if (!function_exists('theme_stack')){
 		return theme()->getStack($name);
 	}
 }
+
+if (!function_exists('theme_security_escape')){
+	/**
+	 * Escape output to prevent XSS attacks.
+	 *
+	 * @param  mixed $value
+	 * @return string
+	 */
+	function theme_security_escape($value) {
+		return \Nlk\Theme\Security\SecurityHelper::escape($value);
+	}
+}
+
+if (!function_exists('theme_security_sanitize')){
+	/**
+	 * Sanitize HTML content.
+	 *
+	 * @param  string $html
+	 * @param  array  $allowedTags
+	 * @return string
+	 */
+	function theme_security_sanitize($html, $allowedTags = null) {
+		return \Nlk\Theme\Security\SecurityHelper::sanitizeHtml($html, $allowedTags);
+	}
+}
+
+if (!function_exists('theme_livewire')){
+	/**
+	 * Render Livewire component.
+	 *
+	 * @param  string $component
+	 * @param  array  $params
+	 * @return string
+	 */
+	function theme_livewire($component, array $params = []) {
+		return \Nlk\Theme\Support\LivewireSupport::renderComponent($component, $params);
+	}
+}
+
+if (!function_exists('theme_react')){
+	/**
+	 * Render React component.
+	 *
+	 * @param  string $component
+	 * @param  array  $props
+	 * @param  string $id
+	 * @return string
+	 */
+	function theme_react($component, array $props = [], $id = null) {
+		return \Nlk\Theme\Support\ReactSSRSupport::renderComponent($component, $props, $id);
+	}
+}
+
+if (!function_exists('theme_inertia')){
+	/**
+	 * Render Inertia page.
+	 *
+	 * @param  string $component
+	 * @param  array  $props
+	 * @return mixed
+	 */
+	function theme_inertia($component, array $props = []) {
+		return \Nlk\Theme\Support\InertiaSupport::render($component, $props);
+	}
+}

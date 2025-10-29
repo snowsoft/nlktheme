@@ -27,6 +27,7 @@ class ThemeServiceProvider extends ServiceProvider {
 		$this->publishes([$configPath => config_path('theme.php')], 'config');
 	
 	    $router->aliasMiddleware('theme', Middleware\ThemeLoader::class);
+	    $router->aliasMiddleware('theme.security', Middleware\SecurityMiddleware::class);
 
 	    // Register blade directives:
 		$this->addToBlade(['dd', 'dd(%s);']);

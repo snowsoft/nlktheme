@@ -13,6 +13,10 @@ Laravel için kapsamlı bir tema yönetim paketi. Birden fazla tema desteği, co
 - ✅ Widget sistemi
 - ✅ Event sistemi
 - ✅ Helper fonksiyonları
+- ✅ **Güvenlik özellikleri** (XSS koruması, CSP, güvenlik header'ları)
+- ✅ **Livewire desteği**
+- ✅ **React + SSR desteği** (Vite entegrasyonu)
+- ✅ **Inertia.js desteği**
 
 ## Kurulum
 
@@ -473,6 +477,27 @@ public function index()
 - `render_if_exists($view, $args, $default)` - Render if exists
 - `theme_set($key, $value)` - Set theme data
 - `theme_get($key, $default)` - Get theme data
+
+## Gelişmiş Özellikler
+
+Paket artık modern frontend framework'leri ve gelişmiş güvenlik özellikleri ile birlikte geliyor:
+
+### Güvenlik
+
+- XSS koruması ve HTML sanitization
+- Content Security Policy (CSP) desteği
+- Güvenlik header'ları (X-Frame-Options, X-XSS-Protection, vb.)
+- View path validation
+
+### Modern Frontend Desteği
+
+- **Livewire**: Server-side reactive component'ler
+- **React + SSR**: Vite entegrasyonu ve server-side rendering
+- **Inertia.js**: SPA deneyimi için tam destek
+
+Detaylı dokümantasyon için:
+- [Hızlı Başlangıç](docs/QUICK_START.md)
+- [Gelişmiş Özellikler](docs/ADVANCED_FEATURES.md)
 
 ## License
 
