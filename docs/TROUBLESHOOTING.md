@@ -173,10 +173,10 @@ themes/
     │   │   └── index.blade.php
     │   └── odeme/
     │       └── odeme.blade.php
-    ├── layouts防备
+    ├── layouts/
     │   └── layout.blade.php
     ├── partials/
-    │   ├── header.blade会用
+    │   ├── header.blade.php
     │   └── footer.blade.php
     ├── assets/
     ├── config.php
