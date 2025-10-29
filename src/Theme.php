@@ -488,7 +488,14 @@ class Theme implements ThemeContract
     protected function addPathLocation($location)
     {
         // First path is in the selected theme.
+        // Add both theme root and views directory for namespace
         $hints[] = base_path($location);
+        
+        // Add views directory if it exists
+        $viewsPath = base_path($location . '/views');
+        if ($this->files->isDirectory($viewsPath)) {
+            $hints[] = $viewsPath;
+        }
 
         // This is nice feature to use inherit from another.
         if ($this->getConfig('inherit')) {
@@ -497,9 +504,14 @@ class Theme implements ThemeContract
 
             // Inherit theme path.
             $inheritPath = base_path($this->path($inherit));
-
             if ($this->files->isDirectory($inheritPath)) {
                 array_push($hints, $inheritPath);
+            }
+            
+            // Add inherit theme views directory
+            $inheritViewsPath = base_path($this->path($inherit) . '/views');
+            if ($this->files->isDirectory($inheritViewsPath)) {
+                array_push($hints, $inheritViewsPath);
             }
         }
 
@@ -511,6 +523,12 @@ class Theme implements ThemeContract
                 $defaultThemePath = base_path($this->path($defaultTheme));
                 if ($this->files->isDirectory($defaultThemePath)) {
                     array_push($hints, $defaultThemePath);
+                }
+                
+                // Add default theme views directory
+                $defaultViewsPath = base_path($this->path($defaultTheme) . '/views');
+                if ($this->files->isDirectory($defaultViewsPath)) {
+                    array_push($hints, $defaultViewsPath);
                 }
             }
         }
@@ -563,8 +581,20 @@ class Theme implements ThemeContract
             $defaultTheme = $this->getConfig('defaultTheme');
             if ($defaultTheme && $defaultTheme != $this->getThemeName()) {
                 $defaultThemePath = base_path($this->path($defaultTheme));
+                $defaultThemeHints = [];
+                
                 if ($this->files->isDirectory($defaultThemePath)) {
-                    $this->view->addNamespace('theme.'.$defaultTheme, $defaultThemePath);
+                    $defaultThemeHints[] = $defaultThemePath;
+                }
+                
+                // Add default theme views directory
+                $defaultViewsPath = base_path($this->path($defaultTheme) . '/views');
+                if ($this->files->isDirectory($defaultViewsPath)) {
+                    $defaultThemeHints[] = $defaultViewsPath;
+                }
+                
+                if (!empty($defaultThemeHints)) {
+                    $this->view->addNamespace('theme.'.$defaultTheme, $defaultThemeHints);
                 }
             }
         }
@@ -1066,7 +1096,13 @@ class Theme implements ThemeContract
                 $content = $this->bladerWithOutServerScript($view, $args);
                 break;
             default :
-                $content = $this->view->make($view, $args)->render();
+                try {
+                    $content = $this->view->make($view, $args)->render();
+                } catch (\InvalidArgumentException $e) {
+                    // Laravel view finder throws InvalidArgumentException when view not found
+                    // Re-throw with more descriptive message
+                    throw new \InvalidArgumentException("View [{$view}] not found.", 0, $e);
+                }
                 break;
         }
 
