@@ -2,416 +2,230 @@
 
 namespace Nlk\Theme\PageBuilder;
 
+use Nlk\Theme\Database\Models\ThemePageSetting;
+use Nlk\Theme\Database\Models\ThemeSectionRow;
+use Nlk\Theme\FlexPage\SectionRegistry;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
+/**
+ * JSON-driven PageBuilder — DB-backed (replaces file-based storage).
+ *
+ * Usage:
+ *   $builder = app(PageBuilder::class);
+ *   $html    = $builder->renderPage('home', $tenantId);
+ *
+ *   // Or from JSON (FlexPage export format):
+ *   $builder->importJson($jsonString, $tenantId);
+ *   $json = $builder->exportJson('home', $tenantId);
+ */
 class PageBuilder
 {
-    /**
-     * Page configurations storage.
-     *
-     * @var array
-     */
-    protected $pages = [];
+    private string $cachePrefix = 'theme:page:';
+
+    public function __construct(
+        private readonly SectionRegistry $registry,
+    ) {}
+
+    // ─── Load ─────────────────────────────────────────────────────────────────
 
     /**
-     * Current page name.
+     * Load page configuration from DB.
      *
-     * @var string
+     * @return array{sections_order: array, settings: array, sections: ThemeSectionRow[]}
      */
-    protected $currentPage;
-
-    /**
-     * Cache prefix.
-     *
-     * @var string
-     */
-    protected $cachePrefix = 'page_builder_';
-
-    /**
-     * Load page configuration.
-     *
-     * @param  string $pageName
-     * @return array
-     */
-    public function loadPage($pageName)
+    public function loadPage(string $pageKey, string $tenantId): array
     {
-        $cacheKey = $this->cachePrefix . $pageName;
+        $ttl      = config('theme.builder.cache_ttl', 300);
+        $cacheKey = $this->cachePrefix . $tenantId . ':' . $pageKey;
 
-        return Cache::remember($cacheKey, 3600, function() use ($pageName) {
-            $configPath = storage_path('app/pagebuilder/' . $pageName . '.json');
-            
-            if (file_exists($configPath)) {
-                return json_decode(file_get_contents($configPath), true);
+        return Cache::remember($cacheKey, $ttl, function () use ($pageKey, $tenantId) {
+            $page = ThemePageSetting::forTenant($tenantId)
+                ->forPage($pageKey)
+                ->with('sectionRows')
+                ->first();
+
+            if (!$page) {
+                return ['sections_order' => [], 'settings' => [], 'sections' => []];
             }
 
-            return [];
+            return [
+                'sections_order' => $page->sections_order ?? [],
+                'settings'       => $page->settings ?? [],
+                'template'       => $page->template,
+                'is_published'   => $page->is_published,
+                'sections'       => $page->sectionRows->keyBy('section_id')->toArray(),
+            ];
         });
     }
 
+    // ─── Save ─────────────────────────────────────────────────────────────────
+
     /**
-     * Save page configuration.
+     * Save (upsert) a full page configuration.
      *
-     * @param  string $pageName
-     * @param  array  $config
-     * @return bool
+     * @param  array{sections_order?: array, settings?: array, template?: string}  $pageData
+     * @param  array<string, array{type: string, settings?: array, block_order?: array, disabled?: bool}>  $sections
      */
-    public function savePage($pageName, array $config)
-    {
-        $directory = storage_path('app/pagebuilder');
-        
-        if (!is_dir($directory)) {
-            mkdir($directory, 0755, true);
+    public function savePage(
+        string $pageKey,
+        string $tenantId,
+        array  $pageData   = [],
+        array  $sections   = [],
+    ): ThemePageSetting {
+        $page = ThemePageSetting::updateOrCreate(
+            ['tenant_id' => $tenantId, 'page_key' => $pageKey],
+            [
+                'template'       => $pageData['template'] ?? 'index',
+                'sections_order' => $pageData['sections_order'] ?? array_keys($sections),
+                'settings'       => $pageData['settings'] ?? [],
+                'is_published'   => $pageData['is_published'] ?? false,
+            ]
+        );
+
+        // Sync section rows
+        $position = 0;
+        $sectionOrder = $pageData['sections_order'] ?? array_keys($sections);
+
+        foreach ($sectionOrder as $sectionId) {
+            if (!isset($sections[$sectionId])) {
+                continue;
+            }
+
+            $sData = $sections[$sectionId];
+
+            ThemeSectionRow::updateOrCreate(
+                ['page_settings_id' => $page->id, 'section_id' => $sectionId],
+                [
+                    'tenant_id'   => $tenantId,
+                    'type'        => $sData['type'],
+                    'settings'    => $sData['settings'] ?? [],
+                    'block_order' => $sData['block_order'] ?? [],
+                    'position'    => $position++,
+                    'disabled'    => $sData['disabled'] ?? false,
+                ]
+            );
         }
 
-        $configPath = $directory . '/' . $pageName . '.json';
-        
-        $saved = file_put_contents($configPath, json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-
-        if ($saved) {
-            Cache::forget($this->cachePrefix . $pageName);
-            return true;
-        }
-
-        return false;
+        $this->flushCache($pageKey, $tenantId);
+        return $page;
     }
 
-    /**
-     * Set current page.
-     *
-     * @param  string $pageName
-     * @return $this
-     */
-    public function page($pageName)
-    {
-        $this->currentPage = $pageName;
-        $this->pages[$pageName] = $this->loadPage($pageName);
-
-        return $this;
-    }
+    // ─── Render ───────────────────────────────────────────────────────────────
 
     /**
-     * Add a widget to page.
-     *
-     * @param  string $widgetName
-     * @param  array  $data
-     * @param  int|null $position
-     * @return $this
+     * Render all enabled sections of a page to HTML.
      */
-    public function addWidget($widgetName, array $data = [], $position = null)
+    public function renderPage(string $pageKey, string $tenantId): string
     {
-        if (!$this->currentPage) {
-            throw new \Exception('No page selected. Use page() method first.');
-        }
+        $page     = $this->loadPage($pageKey, $tenantId);
+        $order    = $page['sections_order'] ?? [];
+        $sections = $page['sections'] ?? [];
+        $html     = '';
 
-        $widget = [
-            'type' => 'widget',
-            'name' => $widgetName,
-            'data' => $data,
-            'position' => $position ?? count($this->pages[$this->currentPage]['sections'] ?? []),
-        ];
+        foreach ($order as $sectionId) {
+            $row = $sections[$sectionId] ?? null;
 
-        if (!isset($this->pages[$this->currentPage]['sections'])) {
-            $this->pages[$this->currentPage]['sections'] = [];
-        }
+            if (!$row || ($row['disabled'] ?? false)) {
+                continue;
+            }
 
-        $this->pages[$this->currentPage]['sections'][] = $widget;
+            $type     = $row['type'] ?? '';
+            $settings = $row['settings'] ?? [];
+            $blocks   = $row['block_order'] ?? [];
 
-        return $this;
-    }
+            if (!$this->registry->has($type)) {
+                Log::warning("ThemeEngine: Unknown section type [{$type}]", ['page' => $pageKey]);
+                continue;
+            }
 
-    /**
-     * Add a blade component to page.
-     *
-     * @param  string $componentName
-     * @param  array  $data
-     * @param  int|null $position
-     * @return $this
-     */
-    public function addComponent($componentName, array $data = [], $position = null)
-    {
-        if (!$this->currentPage) {
-            throw new \Exception('No page selected. Use page() method first.');
-        }
-
-        $component = [
-            'type' => 'component',
-            'name' => $componentName,
-            'data' => $data,
-            'position' => $position ?? count($this->pages[$this->currentPage]['sections'] ?? []),
-        ];
-
-        if (!isset($this->pages[$this->currentPage]['sections'])) {
-            $this->pages[$this->currentPage]['sections'] = [];
-        }
-
-        $this->pages[$this->currentPage]['sections'][] = $component;
-
-        return $this;
-    }
-
-    /**
-     * Add a blade partial to page.
-     *
-     * @param  string $partialName
-     * @param  array  $data
-     * @param  int|null $position
-     * @return $this
-     */
-    public function addPartial($partialName, array $data = [], $position = null)
-    {
-        if (!$this->currentPage) {
-            throw new \Exception('No page selected. Use page() method first.');
-        }
-
-        $partial = [
-            'type' => 'partial',
-            'name' => $partialName,
-            'data' => $data,
-            'position' => $position ?? count($this->pages[$this->currentPage]['sections'] ?? []),
-        ];
-
-        if (!isset($this->pages[$this->currentPage]['sections'])) {
-            $this->pages[$this->currentPage]['sections'] = [];
-        }
-
-        $this->pages[$this->currentPage]['sections'][] = $partial;
-
-        return $this;
-    }
-
-    /**
-     * Set page layout.
-     *
-     * @param  string $layout
-     * @return $this
-     */
-    public function setLayout($layout)
-    {
-        if (!$this->currentPage) {
-            throw new \Exception('No page selected. Use page() method first.');
-        }
-
-        $this->pages[$this->currentPage]['layout'] = $layout;
-
-        return $this;
-    }
-
-    /**
-     * Set page theme.
-     *
-     * @param  string $theme
-     * @return $this
-     */
-    public function setTheme($theme)
-    {
-        if (!$this->currentPage) {
-            throw new \Exception('No page selected. Use page() method first.');
-        }
-
-        $this->pages[$this->currentPage]['theme'] = $theme;
-
-        return $this;
-    }
-
-    /**
-     * Sort sections by position.
-     *
-     * @param  string|null $pageName
-     * @return $this
-     */
-    public function sortSections($pageName = null)
-    {
-        $page = $pageName ?? $this->currentPage;
-
-        if (!isset($this->pages[$page]['sections'])) {
-            return $this;
-        }
-
-        usort($this->pages[$page]['sections'], function($a, $b) {
-            return ($a['position'] ?? 0) <=> ($b['position'] ?? 0);
-        });
-
-        // Re-index positions
-        foreach ($this->pages[$page]['sections'] as $index => &$section) {
-            $section['position'] = $index;
-        }
-
-        return $this;
-    }
-
-    /**
-     * Update section position.
-     *
-     * @param  int $oldPosition
-     * @param  int $newPosition
-     * @param  string|null $pageName
-     * @return $this
-     */
-    public function updateSectionPosition($oldPosition, $newPosition, $pageName = null)
-    {
-        $page = $pageName ?? $this->currentPage;
-
-        if (!isset($this->pages[$page]['sections'])) {
-            return $this;
-        }
-
-        $sections = $this->pages[$page]['sections'];
-        
-        // Remove section from old position
-        $moved = array_splice($sections, $oldPosition, 1);
-        
-        // Insert at new position
-        array_splice($sections, $newPosition, 0, $moved);
-
-        // Update positions
-        foreach ($sections as $index => &$section) {
-            $section['position'] = $index;
-        }
-
-        $this->pages[$page]['sections'] = $sections;
-
-        return $this;
-    }
-
-    /**
-     * Remove section from page.
-     *
-     * @param  int $position
-     * @param  string|null $pageName
-     * @return $this
-     */
-    public function removeSection($position, $pageName = null)
-    {
-        $page = $pageName ?? $this->currentPage;
-
-        if (!isset($this->pages[$page]['sections'])) {
-            return $this;
-        }
-
-        unset($this->pages[$page]['sections'][$position]);
-        
-        // Re-index
-        $this->pages[$page]['sections'] = array_values($this->pages[$page]['sections']);
-        
-        // Update positions
-        foreach ($this->pages[$page]['sections'] as $index => &$section) {
-            $section['position'] = $index;
-        }
-
-        return $this;
-    }
-
-    /**
-     * Get page sections.
-     *
-     * @param  string|null $pageName
-     * @return array
-     */
-    public function getSections($pageName = null)
-    {
-        $page = $pageName ?? $this->currentPage;
-
-        if (!isset($this->pages[$page])) {
-            $this->pages[$page] = $this->loadPage($page);
-        }
-
-        $this->sortSections($page);
-
-        return $this->pages[$page]['sections'] ?? [];
-    }
-
-    /**
-     * Get page configuration.
-     *
-     * @param  string|null $pageName
-     * @return array
-     */
-    public function getConfig($pageName = null)
-    {
-        $page = $pageName ?? $this->currentPage;
-
-        if (!isset($this->pages[$page])) {
-            $this->pages[$page] = $this->loadPage($page);
-        }
-
-        return $this->pages[$page] ?? [];
-    }
-
-    /**
-     * Render page.
-     *
-     * @param  string|null $pageName
-     * @return string
-     */
-    public function render($pageName = null)
-    {
-        $page = $pageName ?? $this->currentPage;
-        $sections = $this->getSections($page);
-        $config = $this->getConfig($page);
-
-        $html = '';
-
-        foreach ($sections as $section) {
-            switch ($section['type']) {
-                case 'widget':
-                    if (function_exists('theme')) {
-                        $html .= theme()->widget($section['name'], $section['data'] ?? [])->render();
-                    }
-                    break;
-                
-                case 'component':
-                    if (function_exists('theme_component')) {
-                        $html .= theme_component($section['name'], null, $section['data'] ?? []);
-                    }
-                    break;
-                
-                case 'partial':
-                    if (function_exists('theme')) {
-                        $html .= theme()->partial($section['name'], $section['data'] ?? []);
-                    }
-                    break;
+            try {
+                $section = $this->registry->resolve($type);
+                $data    = $section->fetchData($settings, $tenantId);
+                $html   .= $section->render($settings, $blocks, $data);
+            } catch (\Throwable $e) {
+                Log::error("ThemeEngine: Section render failed [{$type}]", ['error' => $e->getMessage()]);
             }
         }
 
         return $html;
     }
 
-    /**
-     * Save current page configuration.
-     *
-     * @param  string|null $pageName
-     * @return bool
-     */
-    public function save($pageName = null)
-    {
-        $page = $pageName ?? $this->currentPage;
+    // ─── Import / Export (FlexPage JSON) ────────────────────────────
 
-        if (!$page || !isset($this->pages[$page])) {
-            return false;
+    /**
+     * Export a page as a FlexPage JSON string.
+     */
+    public function exportJson(string $pageKey, string $tenantId): string
+    {
+        $page = $this->loadPage($pageKey, $tenantId);
+
+        $export = [
+            'page_key'       => $pageKey,
+            'template'       => $page['template'] ?? 'index',
+            'settings'       => $page['settings'] ?? [],
+            'sections'       => [],
+            'order'          => $page['sections_order'] ?? [],
+        ];
+
+        foreach ($page['sections'] as $sectionId => $row) {
+            $export['sections'][$sectionId] = [
+                'type'        => $row['type'],
+                'settings'    => $row['settings'] ?? [],
+                'block_order' => $row['block_order'] ?? [],
+                'disabled'    => $row['disabled'] ?? false,
+            ];
         }
 
-        $this->sortSections($page);
-
-        return $this->savePage($page, $this->pages[$page]);
+        return json_encode($export, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
     }
 
     /**
-     * Delete page configuration.
-     *
-     * @param  string $pageName
-     * @return bool
+     * Import from a FlexPage JSON string and persist to DB.
      */
-    public function delete($pageName)
+    public function importJson(string $json, string $tenantId): ThemePageSetting
     {
-        $configPath = storage_path('app/pagebuilder/' . $pageName . '.json');
-        
-        if (file_exists($configPath)) {
-            Cache::forget($this->cachePrefix . $pageName);
-            return unlink($configPath);
-        }
+        $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
 
-        return false;
+        $pageKey  = $data['page_key'] ?? 'home';
+        $pageData = [
+            'template'       => $data['template'] ?? 'index',
+            'settings'       => $data['settings'] ?? [],
+            'sections_order' => $data['order'] ?? array_keys($data['sections'] ?? []),
+        ];
+
+        return $this->savePage($pageKey, $tenantId, $pageData, $data['sections'] ?? []);
+    }
+
+    // ─── Schema ───────────────────────────────────────────────────────────────
+
+    /**
+     * Get all registered section schemas (for a visual editor / admin).
+     */
+    public function getSectionSchemas(): array
+    {
+        $schemas = [];
+        foreach ($this->registry->all() as $type => $class) {
+            try {
+                $schemas[$type] = app($class)->schema();
+            } catch (\Throwable) {
+                // skip
+            }
+        }
+        return $schemas;
+    }
+
+    // ─── Cache ────────────────────────────────────────────────────────────────
+
+    public function flushCache(string $pageKey, string $tenantId): void
+    {
+        Cache::forget($this->cachePrefix . $tenantId . ':' . $pageKey);
+    }
+
+    public function flushTenantCache(string $tenantId): void
+    {
+        // Redis SCAN yok, prefix based — uygulamada cache tags kullanılabilir
+        Cache::flush();
     }
 }
-

@@ -1,7 +1,7 @@
 {
     "name": "snowsoft/nlktheme",
-    "description": "",
-    "keywords": ["laravel", "theme", "layout", "asset", "widget"],
+    "description": "FlexPage-style JSON-driven hybrid theme engine for Laravel 13",
+    "keywords": ["laravel", "theme", "shopify", "pagebuilder", "json", "sections"],
     "homepage": "https://github.com/snowsoft/nlktheme",
     "type": "library",
     "license": "MIT",
@@ -12,16 +12,15 @@
         }
     ],
     "require": {
-        "php": ">=8.2",
- 
+        "php": "^8.5",
+        "laravel/framework": "^13.0",
         "matthiasmullie/minify": "*",
-        "laravel/framework": ">=9.0",
-       "nesbot/carbon": "*"
-
- 
+        "nesbot/carbon": "*",
+        "guzzlehttp/guzzle": "^7.0"
     },
     "require-dev": {
-
+        "phpunit/phpunit": "^12.0",
+        "orchestra/testbench": "^10.0"
     },
     "autoload": {
         "psr-4": {
@@ -34,5 +33,22 @@
             "src/helpers.php"
         ]
     },
-    "minimum-stability": "dev"
+    "autoload-dev": {
+        "psr-4": {
+            "Nlk\\Theme\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Nlk\\Theme\\ThemeServiceProvider"
+            ],
+            "aliases": {
+                "Theme": "Nlk\\Theme\\Facades\\Theme",
+                "PageBuilder": "Nlk\\Theme\\Facades\\PageBuilder"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }

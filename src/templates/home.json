@@ -1,0 +1,87 @@
+{
+    "name": "FlexPage Example Page",
+    "version": "1.0.0",
+    "page_key": "home",
+    "template": "index",
+    "settings": {
+        "colors_accent_1": "#121212",
+        "colors_accent_2": "#6d6d6d",
+        "colors_background_1": "#ffffff",
+        "colors_background_2": "#f3f3f3",
+        "typography_header_font": "Inter",
+        "typography_body_font": "Inter"
+    },
+    "sections": {
+        "announcement_bar": {
+            "type": "announcement-bar",
+            "settings": {
+                "text": "Tüm siparişlerde ücretsiz kargo!",
+                "link": "/kampanya",
+                "bg_color": "#121212",
+                "text_color": "#ffffff",
+                "show_close_btn": true
+            },
+            "disabled": false
+        },
+        "hero_main": {
+            "type": "hero",
+            "settings": {
+                "autoplay": true,
+                "interval": 5000,
+                "height": "large"
+            },
+            "disabled": false
+        },
+        "featured_products": {
+            "type": "featured-products",
+            "settings": {
+                "title": "Öne Çıkan Ürünler",
+                "products_to_show": 8,
+                "columns": "4",
+                "show_price": true,
+                "show_rating": true,
+                "source": "mysql"
+            },
+            "block_order": [],
+            "disabled": false
+        },
+        "main_banner": {
+            "type": "image-banner",
+            "settings": {
+                "title": "Yeni Koleksiyon",
+                "subtitle": "2026 İlkbahar/Yaz",
+                "btn_label": "Keşfet",
+                "btn_link": "/koleksiyon/yeni",
+                "zone": "ana",
+                "text_align": "center"
+            },
+            "disabled": false
+        },
+        "collections": {
+            "type": "collection-list",
+            "settings": {
+                "title": "Koleksiyonlar",
+                "columns": 4,
+                "limit": 8
+            },
+            "disabled": false
+        },
+        "promo_text": {
+            "type": "rich-text",
+            "settings": {
+                "title": "Neden Biz?",
+                "content": "<p>Kalite ve güveni bir arada sunuyoruz.</p>",
+                "text_align": "center"
+            },
+            "disabled": false
+        }
+    },
+    "order": [
+        "announcement_bar",
+        "hero_main",
+        "featured_products",
+        "main_banner",
+        "collections",
+        "promo_text"
+    ]
+}

@@ -2,122 +2,48 @@
 
 namespace Nlk\Theme\PageBuilder;
 
+use Nlk\Theme\PageBuilder\PageBuilder;
+
+/**
+ * PageRenderer — standalone render helper.
+ * Delegates to PageBuilder for full section rendering.
+ */
 class PageRenderer
 {
-    /**
-     * Page builder instance.
-     *
-     * @var PageBuilder
-     */
-    protected $builder;
+    public function __construct(
+        private readonly PageBuilder $builder,
+    ) {}
 
     /**
-     * Create new PageRenderer instance.
-     *
-     * @param  PageBuilder $builder
+     * Render all page sections to HTML.
      */
-    public function __construct(PageBuilder $builder)
+    public function render(string $pageKey, string $tenantId): string
     {
-        $this->builder = $builder;
+        return $this->builder->renderPage($pageKey, $tenantId);
     }
 
     /**
-     * Render page with theme layout.
-     *
-     * @param  string $pageName
-     * @return \Illuminate\Http\Response
+     * Render a single named section from a page.
      */
-    public function render($pageName)
+    public function renderSection(string $pageKey, string $tenantId, string $sectionId): string
     {
-        $config = $this->builder->getConfig($pageName);
-        $sections = $this->builder->getSections($pageName);
+        $page     = $this->builder->loadPage($pageKey, $tenantId);
+        $sections = $page['sections'] ?? [];
+        $row      = $sections[$sectionId] ?? null;
 
-        $theme = $config['theme'] ?? config('theme.themeDefault', 'default');
-        $layout = $config['layout'] ?? config('theme.layoutDefault', 'layout');
-
-        // Set theme and layout
-        if (function_exists('theme')) {
-            theme()->uses($theme)->layout($layout);
+        if (!$row || ($row['disabled'] ?? false)) {
+            return '';
         }
 
-        // Collect rendered sections
-        $renderedSections = [];
-        
-        foreach ($sections as $section) {
-            $renderedSections[] = $this->renderSection($section);
+        $registry = app(\Nlk\Theme\FlexPage\SectionRegistry::class);
+
+        if (!$registry->has($row['type'])) {
+            return '';
         }
 
-        // Create view data
-        $viewData = array_merge(
-            $config['data'] ?? [],
-            ['sections' => $renderedSections, 'pageConfig' => $config]
-        );
+        $section = $registry->resolve($row['type']);
+        $data    = $section->fetchData($row['settings'] ?? [], $tenantId);
 
-        // Render page view or return content
-        if (isset($config['view'])) {
-            return theme()->view($config['view'], $viewData);
-        }
-
-        // Or render sections directly
-        $content = implode('', $renderedSections);
-        
-        return theme()->of('pagebuilder::dynamic', ['content' => $content])->render();
-    }
-
-    /**
-     * Render a single section.
-     *
-     * @param  array $section
-     * @return string
-     */
-    protected function renderSection(array $section)
-    {
-        switch ($section['type']) {
-            case 'widget':
-                if (function_exists('theme')) {
-                    try {
-                        return theme()->widget($section['name'], $section['data'] ?? [])->render();
-                    } catch (\Exception $e) {
-                        return '<!-- Widget Error: ' . $e->getMessage() . ' -->';
-                    }
-                }
-                break;
-            
-            case 'component':
-                if (function_exists('theme_component')) {
-                    try {
-                        return theme_component($section['name'], null, $section['data'] ?? []) ?: '';
-                    } catch (\Exception $e) {
-                        return '<!-- Component Error: ' . $e->getMessage() . ' -->';
-                    }
-                }
-                break;
-            
-            case 'partial':
-                if (function_exists('theme')) {
-                    try {
-                        return theme()->partial($section['name'], $section['data'] ?? []) ?: '';
-                    } catch (\Exception $e) {
-                        return '<!-- Partial Error: ' . $e->getMessage() . ' -->';
-                    }
-                }
-                break;
-
-            case 'html':
-                return $section['content'] ?? '';
-            
-            case 'view':
-                if (function_exists('theme')) {
-                    try {
-                        return theme()->view($section['name'], $section['data'] ?? [])->render();
-                    } catch (\Exception $e) {
-                        return '<!-- View Error: ' . $e->getMessage() . ' -->';
-                    }
-                }
-                break;
-        }
-
-        return '';
+        return $section->render($row['settings'] ?? [], $row['block_order'] ?? [], $data);
     }
 }
-
