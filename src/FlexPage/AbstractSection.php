@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\View;
  */
 abstract class AbstractSection implements Section
 {
-    final public function dataSource(): string
+    public function dataSource(): string
     {
         return 'static'; // override in subclass: 'mysql' | 'api' | 'hybrid' | 'static'
     }
